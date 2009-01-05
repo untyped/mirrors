@@ -1,0 +1,412 @@
+_JavaScript_
+_javascript_
+
+The JavaScript Collection
+
+This collection provides an implementation of the EcmaScript language
+specified by ECMA-262, Edition 3, better known as JavaScript.
+
+http://www.ecma-international.org/publications/standards/Ecma-262.htm
+
+For license information, please see the file COPYING.LIB.
+
+The collection provides the following public modules:
+
+_config.ss_: language options
+_eval.ss_: evaluate JavaScript source
+_exn.ss_: JavaScript runtime exceptions
+_compiler/compile.ss_: JavaScript->Scheme compiler
+_compiler/hoist.ss_: hoist variable declarations
+_syntax/ast.ss_: JavaScript abstract syntax data definitions
+_syntax/parse.ss_: JavaScript parser
+_syntax/pretty-print.ss_: JavaScript source pretty-printer
+_syntax/sexp.ss_: alternative S-expression syntax for JavaScript
+
+
+INSTALLATION ===================================================================
+
+To use the JavaScript language level, simply install the PLaneT package from the
+command-line with `planet -i' (see the PLaneT command-line tool docs).
+
+To use the language level, restart DrScheme and select "JavaScript" from the
+"Language..." menu.
+
+
+KNOWN LIMITATIONS ==============================================================
+
+Likely to be fixed eventually:
+
+- the `toString' method for functions doesn't produce their source yet
+- semantics of exceptions is probably not quite right
+  o return from finally blocks
+  o suspicious uses of dynamic-wind
+- standard library stubbed but mostly not implemented
+- proper tail recursion is not yet implemented
+
+Unlikely to be fixed any time soon:
+
+- numbers are probably not entirely faithful to spec
+- regular expressions don't yet work at all
+- compiler optimizations
+
+
+DESIGN DECISIONS ===============================================================
+
+REF TYPE: no expressions ever evaluate to refs at runtime. The spec
+allows for the *possibility* that some implementations may allow
+arbitrary expressions (particularly function calls) to evaluate to
+refs, which means that all evaluation points that expect non-ref
+values must explicitly dereference their inputs. But the spec does not
+*require* an implementation to allow for this possibility. In the
+interest of both a more efficient evaluation model and one which more
+closely matches that of Scheme (the target of the compiler), only
+those syntactic forms that explicitly produce references (variable
+references, object property references, and computed object property
+references) may be used on the left-hand side of an assignment. All
+other expression forms appearing on the left-hand side of an
+assignment are treated as compile-time errors.
+
+BINDINGS AND `with': code that does not syntactically occur underneath
+the `with' form is compiled to a much more efficient form that closely
+matches Scheme's binding forms: almost all variables are lexically
+scoped, with the notable exception of top-level bindings, which are
+looked up dynamically in the global object. The compilation of `with'
+is still faithful to the spec, but it results in much more inefficient
+code: when evaluating the body of a `with' statement, the entire
+lexical environment is copied into a runtime scope chain which
+correctly contains the given object as a frame. Subsequent variable
+references that syntactically occur within that `with' form are looked
+up dynamically in this scope chain.
+
+PROTO: Some JavaScript implementations provide a __proto__ field that
+exposes the internal [[Prototype]] property of an object, and even
+make this mutable (with dynamic restrictions to prevent cycles in
+prototype chains). I may provide this read-only at some point, but I
+will probably not make it mutable. I haven't decided yet.
+
+
+DATA STRUCTURES ================================================================
+
+An input-source is one of:
+  - path
+  - string
+  - input-port
+
+
+AVAILABLE MODULES ==============================================================
+
+_eval.ss_
+
+(require (planet "eval.ss" ("dherman" "javascript.plt" <maj> <min>)))
+
+> (make-javascript-namespace) :: -> javascript-namespace
+
+Creates a new namespace that can be used as the optional argument to
+the eval-* functions.
+
+> (reset-javascript-namespace! ns) :: javascript-namespace -> any
+
+Resets the standard library and global object to their initial state
+within a given JavaScript namespace.
+
+> (eval-javascript-string in [ns]) :: input-source * [javascript-namespace] -> any
+
+Evaluates a JavaScript program from textual source.
+
+> (eval-javascript-sexp sexp [ns]) :: s-expression * [javascript-namespace] -> any
+
+Evaluates a JavaScript program in S-expression syntax.
+
+> (eval-compiled-javascript stx [ns]) :: syntax * [javascript-namespace] -> any
+
+Evaluates a compiled JavaScript program, as produced by
+e.g. _compile-script_ from compiler/compile.ss.
+
+
+_syntax/parse.ss_
+
+(require (planet "parse.ss" ("dherman" "javascript.plt" <maj> <min>) "syntax"))
+
+> parser<%> :: interface
+
+The parser<%> interface defines the following methods:
+
+> (parse-source-element) :: -> SourceElement
+
+Parse a single source element.
+
+> (parse-source-elements) :: -> (listof SourceElement)
+
+Parse a list of source elements.
+
+> (parse-expression) :: -> Expression
+
+Parse a single expression.
+
+> (parse-function-expression) :: -> FunctionExpression
+
+Parse a single function expression.
+
+> (skip-empty-tokens) :: -> any
+
+Skip past any insignificant layout tokens.
+
+The parser% class implements the parser<%> interface.
+
+> parser% :: (implementationof parser<%>)
+
+> (input-source? x) :: any -> boolean
+
+Is the argument an input-source (input-port, string, or path)?
+
+> (input-source->input-port in) :: input-source -> input-port
+
+Converts an input-source to an input-port.
+
+> (input-source->parser in) :: input-source -> (instanceof parser<%>)
+
+Produces a parser for a given input source.
+
+> (parse-script in) :: input-source -> (listof SourceElement)
+
+Parses an input source as a JavaScript script, i.e., a list of SourceElements.
+
+> (parse-expression in) :: input-source -> Expression
+
+Parses an expression from an input source.
+
+> (parse-function-expresion in) :: input-source -> FunctionExpression
+
+Parses a function expression from an input source.
+
+> (parse-source-element in) :: input-source -> SourceElement
+
+Parses a source element from an input source.
+
+
+_syntax/ast.ss_
+
+(require (planet "ast.ss" ("dherman" "javascript.plt" <maj> <min>) "syntax"))
+
+Provides the data definitions for the JavaScript AST. See the source
+for details.
+
+
+_syntax/sexp.ss_
+
+(require (planet "sexp.ss" ("dherman" "javascript.plt" <maj> <min>) "syntax"))
+
+> (sexp? x) :: any -> boolean
+
+Is the given argument an s-expresion?
+
+The sexp.ss module provides the three following S-expression
+"pretty-printers":
+
+> (Expression->sexp expr) :: Expresion -> sexp
+> (Statement->sexp stmt) :: Statement -> sexp
+> (SourceElement->sexp elt) :: SourceElement -> sexp
+
+The sexp.ss module provides the three following S-expression parsers:
+
+> (sexp->Expression sexp) :: sexp -> Expression
+> (sexp->Statement sexp) :: sexp -> Statement
+> (sexp->SourceElement sexp) :: sexp -> SourceElement
+
+
+_compiler/compile.ss_
+
+The compile.ss module compiles JavaScript abstract syntax to Scheme
+syntax objects. The compilation process preserves source location
+information in the resulting syntax objects. Compilation involves a
+"hoisting" process, which lifts embedded variable declarations out to
+their appropriate scope (see _compiler/hoist.ss_).
+
+> (compile-script elts) :: (listof SourceElement) -> syntax
+
+Hoists and compiles a list of source elements as a JavaScript script.
+
+> (compile-interaction elts) :: (listof SourceElement) -> syntax
+
+Hoists and compiles a list of source elements as a REPL interaction.
+
+> (compile-function-expression expr) :: FunctionExpression -> syntax
+
+Hoists and compiles a function expression.
+
+> (with-syntax-errors thunk) :: (-> a) -> a
+
+Applies the thunk but wraps any JavaScript syntax errors that are
+raised by evaluation of the thunk as DrScheme syntax errors.
+
+
+_compiler/hoist.ss_
+
+Variable declarations in JavaScript implicitly affect their enclosing
+block structure. Declarations involving `var' get hoisted out to their
+nearest enclosing function declaration (or top level), and
+declarations involving `let' get hoisted out to their nearest
+enclosing block.
+
+The AST structure after the hoisting pass is identical to the original
+AST structure, except the following */hoisted forms replace instances
+of their similarly named forms from the original AST hierarchy.
+
+> (struct (FunctionDeclaration/hoisted FunctionDeclaration) (location name args body functions vars))
+
+location :: (optional region)
+
+The source location of the function.
+
+name :: Identifier
+
+The function name.
+
+args :: (listof Identifier)
+
+The list of named arguments.
+
+body :: (listof Statement)
+
+The function's body -- just statements, no declarations.
+
+functions :: (listof FunctionDeclaration/hoisted)
+
+The list of all function declarations nested within this one (not
+including subsequent function declarations nested within those).
+
+vars :: (listof Identifier)
+
+The list of all `var'-bound variables declared to be in this
+function's scope level (not including variables declared in nested
+function declarations).
+
+> (struct (FunctionExpression/hoisted FunctionExpression) (location name args body functions vars))
+
+location :: (optional region)
+
+As above.
+
+name :: (optional Identifier)
+
+The function name, if declared in the expression form itself.
+
+args :: (listof Identifier)
+body :: (listof Statement)
+functions :: (listof FunctionDeclaration/hoisted)
+vars :: (listof Identifier)
+
+As above.
+
+> (struct (BlockStatement/hoisted BlockStatement) (location statements functions vars))
+
+location :: (optional region)
+
+The source location of the block statement.
+
+statements :: (listof Statement)
+
+The body of the block -- just statements, no declarations.
+
+functions :: (listof FunctionDeclaration/hoisted)
+
+The list of all function declarations nested within this block (not
+including subsequent function declarations nested within those).
+
+vars :: (listof Identifier)
+
+The list of all `let'-bound variables declared to be in this block's
+scope level (not including variables declared in nested blocks).
+
+
+RELEASE HISTORY ================================================================
+
+Version 0.13
+2006-08-08
+
+Expressions are extensible: leaf nodes are checked with custom predicates.
+Pretty-printing is extensible: extended nodes are printed with custom printers.
+
+Version 0.12
+2006-07-18
+
+Fixed bug related to nested `with' statements.
+
+Version 0.11
+2006-07-17
+
+Stubbed lots of standard libraries.
+Some more documentation.
+Added `parse-function-expression' to parser<%> interface.
+Implemented reflective Function constructor.
+Implemented primitive constructors (except Date and RegExp).
+Moved language level files into subdirectory.
+
+Version 0.10
+2006-07-13
+
+Implemented JavaScript `eval' library function.
+
+Version 0.9
+2006-07-12
+
+Created `eval-*' functions for interpreting JavaScript.
+Should soon be able to implement JavaScript `eval'.
+Improved tests.
+
+Version 0.8
+2006-07-12
+
+Fixed bug involving nested `with' forms.
+Corrected implementation of binding of `catch' variables.
+Implemented all `let' forms.
+
+Version 0.7
+2006-07-11
+
+Fixed some small type-related bugs with hoisting and compilation.
+
+Version 0.6
+2006-07-11
+
+Fixed nested `with' bug.
+
+Version 0.5
+2006-07-11
+
+New implementation of binding: no more evaluating to refs!
+Nested `with' forms are broken.
+Binding arrows are broken for top-level.
+
+Version 0.4
+2006-07-06
+
+Got rid of unnecessary PLTCOLLECTS hack for testing.
+Fixed bugs in sexp and pretty-print due to changed AST types.
+Hoisting for ES4 `let' corrected.
+
+Version 0.3
+2006-06-28
+
+Drastically improved binding implementation.
+Addressed serious bugs in implementation of functions.
+Began implementation for debug console (still disabled).
+
+Version 0.2
+2006-06-22
+
+Added newly required `capability-value' to language level interface.
+Bug fixed for pretty-printer (thanks to Jay).
+Serialized language level settings.
+Broke `let'.
+(Internally: hoisting for ES4 `let' in place.)
+
+Version 0.1
+2006-02-23
+
+Initial release.
+Implements most of ECMA-262 Edition 3.
+Primary limitations:
+ Lack of regular expressions
+ Lack of standard library
+ No reflection or function reification
