@@ -1,0 +1,6 @@
+(module info (lib "infotab.ss" "setup")
+  (define name "JavaScript: DrScheme Language Level")
+  (define tools '(("tool.ss")))
+  (define tool-icons '("rhino.png"))
+  (define tool-names '("JavaScript"))
+  (define tool-urls '("http://www.ecma-international.org/publications/standards/Ecma-262.htm")))

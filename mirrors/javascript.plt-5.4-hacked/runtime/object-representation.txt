@@ -1,0 +1,138 @@
+Objects
+================================================================================
+(define-struct object (call proto class table))
+
+call :  (evector -> value)
+
+    For callable objects (i.e., functions and constructors), the
+    representation of the function, which takes a vector of arguments
+    and returns the result of evaluating the JavaScript function.
+
+proto : (optional object)
+
+    The internal prototype link, or #f if the object has no prototype.
+
+class : string
+
+    The string representation of the ``class'' of an object.
+
+table : (hash-table-of string property)
+
+    The table of properties, indexed by strings.
+
+
+Properties
+================================================================================
+property-value ::= value | ref
+property       ::= property-value | (cons property-value attributes)
+attributes     ::= (bit-field-of READ-ONLY? DONT-ENUM? DONT-DELETE?)
+
+property-value : (union value ref)
+
+    The current value of the property, or a getter/setter pair for the value.
+
+attributes : bit-field
+
+    The attributes of the property.
+
+READ-ONLY? : bit-flag
+
+    Are attempts to update the value of the property ignored?
+
+DONT-ENUM? : bit-flag
+
+    Should the property be skipped in for-in enumerations?
+
+DONT-DELETE? : bit-flag
+
+    Are attempts to delete the property ignored?
+
+
+Arrays
+================================================================================
+(define-struct (array object) (vector))
+
+vector : (evector-of (optional value))
+
+    The internal vector of integer-indexed values. For sparse arrays,
+    undefined elements are represented as #f. This allows for the
+    distinction between undefined elements and defined elements with
+    the `undefined' value.
+
+
+Internal Properties and Methods
+================================================================================
+
+The following describes the runtime representation of the internal properties
+and methods as described by section 8.6.2 in the EcmaScript spec.
+
+
+Field              Representation
+--------------------------------------------------
+[[Prototype]]      js:object field
+[[Class]]          meta-function
+[[Value]]          meta-function
+[[Get]]            meta-function*
+[[Put]]            meta-function*
+[[CanPut]]         meta-function
+[[HasProperty]]    meta-function
+[[Delete]]         meta-function
+[[DefaultValue]]   meta-function
+[[Construct]]      js:object procedure field
+[[Call]]           js:object procedure field
+[[HasInstance]]    meta-function
+[[Scope]]          environment (static, dynamic)
+[[Match]]          meta-function
+--------------------------------------------------
+
+* will eventually be overrideable, so will
+  eventually need to be a js:object field
+
+
+Justification
+================================================================================
+
+[[Class]]
+
+    From 8.6.2:
+
+    "Note that this specification does not provide any means for
+    a program to access that value except through
+    Object.prototype.toString"
+
+[[Value]]
+
+    only implemented for a fixed set of primitive objects, so a
+    case dispatch is sufficient
+
+[[Get]], [[Put]]
+
+    overrideable in the future, but for now fixed
+
+[[CanPut]]
+
+    just needs to check attributes, not overrideable
+
+[[HasProperty]], [[Delete]], [[DefaultValue]]
+
+    never overridden
+
+[[Construct]]
+
+    Array works differently depending on whether it's called as
+    a function or a constructor
+
+[[HasInstance]]
+
+    only defined on Function objects
+    only used to implement instanceof
+
+[[Scope]]
+
+    only used as internal spec mechanism
+    when lexically scoped, just use Scheme closures
+    when dynamically scoped, use dynamic environments and meta-functions
+
+[[Match]]
+
+    only used for regexps, never overridden
