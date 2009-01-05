@@ -1,0 +1,38 @@
+_List_
+_list_
+
+This collection provides one file:
+
+ _list.ss_: combines the best of the mzscheme list libraries.
+
+======================================================================
+
+This library provides all the exports from:
+
+    srfi/1/list
+    scheme/list
+
+The following procedures from SRFI-1 are exported renamed to
+distinguish them from their counterparts in scheme/list:
+
+    SRFI-1 name   Exported name
+    -----------   -------------
+    fold          s:fold
+    fold-right    s:fold-right
+    first         s:first
+    second        s:second
+    third         s:third
+    fourth        s:fourth
+    fifth         s:fifth
+    sixth         s:sixth
+    seventh       s:seventh
+    eighth        s:eighth
+    ninth         s:ninth
+    tenth         s:tenth
+    last          s:last
+    member        s:member
+    remove        s:remove
+    assoc         s:assoc
+    map           s:map
+    for-each      s:for-each
+    filter        s:filter
