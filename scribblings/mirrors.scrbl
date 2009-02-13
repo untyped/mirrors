@@ -17,6 +17,6 @@ Dave Gurnell
 
 @section{Acknowledgements}
 
-Mirrors makes heavy use of Javascript.plt and PPrint.plt by Dave Herman. Many thanks to Dave for all of his hard work.
+Many thanks to Dave Herman for Javascript.plt and PPrint.plt, both of which are used extensively in Mirrors.
 
-Thanks also to David Brooks, Matt Jadud, Fausto LS, Jay McCarthy, Noel Welsh, and for their contributions, feedback, suggestions and bug fixes.
+Thanks also to the following for their contributions: David Brooks, Matt Jadud, Fausto LS, Jay McCarthy, Karsten Patzwaldt and Noel Welsh.
