@@ -27,10 +27,10 @@ At the time of writing the fast renderer has not been properly tested: use it wi
 
 @section{Sending HTTP responses with Javascript content}
 
-@defproc[(make-js-response [#:code code integer 200]
-                           [#:message message string "OK"]
-                           [#:seconds seconds integer (current-seconds)]
-                           [#:mime-type mime-type (U string bytes) #"text/javascript; charset=utf-8"]
-                           [#:headers headers (alistof symbol string) no-cache-http-headers]
-                           [content javascript-statement]) response]{
+@defproc[(make-js-response [#:code code integer? 200]
+                           [#:message message (U string? bytes?) #"OK"]
+                           [#:seconds seconds integer? (current-seconds)]
+                           [#:mime-type mime-type (U string? bytes?) #"text/javascript; charset=utf-8"]
+                           [#:headers headers (alistof symbol? string?) no-cache-http-headers]
+                           [content javascript-statement?]) response/full?]{
 Takes a @scheme[js] statement and wraps it in an HTTP response object that can be used with the PLT web server (including procedures such as @scheme[send/suspend] and @scheme[send/suspend/dispatch]). The keyword arguments correspond to the first five arguments of @scheme[make-response/full].}

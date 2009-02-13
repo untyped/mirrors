@@ -11,26 +11,26 @@ Mirrors contains a few procedures and utilities for sending plain text responses
 @defmodule[(planet untyped/mirrors/plain/plain)]
 
 @defproc[(make-plain-response [#:code code integer? 200]
-                              [#:message message string? "OK"]
-                              [#:seconds seconds integer (current-seconds)]
+                              [#:message message (U string? bytes?) #"OK"]
+                              [#:seconds seconds integer? (current-seconds)]
                               [#:mime-type mime-type (U string? bytes?) #"text/plain; charset=utf-8"]
                               [#:headers headers (alistof symbol? string?) no-cache-http-headers]
-                              [content (listof string?)]) response]{
+                              [content (listof string?)]) response/full?]{
 Keyword wrapper for @scheme[make-response/full] with sensible defaults for most purposes.}
 
 @defproc[(make-plain-response/incremental [#:code code integer? 200]
-                                          [#:message message string? "OK"]
+                                          [#:message message (U string? bytes?) #"OK"]
                                           [#:seconds seconds integer? (current-seconds)]
                                           [#:mime-type mime-type (U string? bytes?) #"text/plain; charset=utf-8"]
                                           [#:headers headers (alistof symbol? string?) no-cache-http-headers]
-                                          [content (((listof (U bytes? string?)) -> any) -> any)]) response]{
+                                          [content (((listof (U bytes? string?)) -> any) -> any)]) response/incremental?]{
 Keyword wrapper for @scheme[make-response/incremental] with sensible defaults for most purposes.}
 
 
 @defproc[(make-redirect-response [#:code code integer? 302]
-                                 [#:message message string? "Moved temporarily"]
+                                 [#:message message (U string? bytes?) #"Moved temporarily"]
                                  [#:headers headers (alistof symbol? string?) no-cache-http-headers]
-                                 [url (U string? url?)]) response]{
+                                 [url (U string? url?)]) response/full?]{
 Creates a response that redirects the user to the specified @scheme[url]. A @italic{Location} header is constructed from the URL; members of @scheme[headers] of the same name are removed.}
 
 @defthing[no-cache-http-headers (listof header?)]{

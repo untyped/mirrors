@@ -2,7 +2,9 @@
 
 (require (for-syntax scheme/base)
          scribble/eval
-         scribble/manual)
+         scribble/manual
+         (for-label scheme/base
+                    "../main.ss"))
 
 ; Sandbox evaluation for examples ----------------
 
@@ -20,6 +22,8 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out scribble/eval)
-         (all-from-out scribble/manual)
-         define-eval)
+(provide (all-from-out scribble/eval
+                       scribble/manual)
+         define-eval
+         (for-label (all-from-out scheme/base
+                                  "../main.ss")))

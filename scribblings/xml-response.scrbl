@@ -47,18 +47,18 @@ instead of manually creating an HTTP response using @scheme[make-respone/full]:
 
 Naturally, the PLT web server does not have built-in support for Mirrors XML expressions. Mirrors provides a couple of useful procedures to help you send responses:
 
-@defproc[(make-xml-response [#:code code integer 200]
-                            [#:message message string "OK"]
-                            [#:seconds seconds integer (current-seconds)]
-                            [#:mime-type mime-type (U string bytes) #"text/xml; charset=utf-8"]
-                            [#:headers headers (alistof symbol string) no-cache-http-headers]
-                            [content xml]) response]{
+@defproc[(make-xml-response [#:code code integer? 200]
+                            [#:message message (U string? bytes?) #"OK"]
+                            [#:seconds seconds integer? (current-seconds)]
+                            [#:mime-type mime-type (U string? bytes?) #"text/xml; charset=utf-8"]
+                            [#:headers headers (alistof symbol? string?) no-cache-http-headers]
+                            [content xml?]) response/full?]{
 Takes an @scheme[xml] expression argument and wraps it in an HTTP response object that can be used with the PLT web server (including procedures such as @scheme[send/suspend] and @scheme[send/suspend/dispatch]). The keyword arguments correspond to the first five arguments of @scheme[make-response/full].}
 
-@defproc[(make-html-response [#:code code integer 200]
-                             [#:message message string "OK"]
-                             [#:seconds seconds integer (current-seconds)]
-                             [#:mime-type mime-type (U string bytes) #"text/html; charset=utf-8"]
-                             [#:headers headers (alistof symbol string) no-cache-http-headers]
-                             [content xml]) response]{
+@defproc[(make-html-response [#:code code integer? 200]
+                             [#:message message (U string? bytes?) #"OK"]
+                             [#:seconds seconds integer? (current-seconds)]
+                             [#:mime-type mime-type (U string? bytes?) #"text/html; charset=utf-8"]
+                             [#:headers headers (alistof symbol? string?) no-cache-http-headers]
+                             [content xml?]) response/full?]{
 Like @scheme[make-xml-response] but with a default MIME type of @scheme{text/html}.}

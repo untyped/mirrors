@@ -8,13 +8,13 @@
 
 @section{Rendering CSV data in string form}
 
-@defproc[(csv->string [val csv]) string]{
+@defproc[(csv->string [val csv?]) string?]{
 Renders a CSV sheet as a string.}
 
-@defproc[(make-csv-response [#:code code integer 200]
-                            [#:message message string "OK"]
-                            [#:seconds seconds integer (current-seconds)]
-                            [#:mime-type mime-type (U string bytes) #"text/xml; charset=utf-8"]
-                            [#:headers headers (alistof symbol string) no-cache-http-headers]
-                            [content csv]) response]{
+@defproc[(make-csv-response [#:code code integer? 200]
+                            [#:message message (U string? bytes?) #"OK"]
+                            [#:seconds seconds integer? (current-seconds)]
+                            [#:mime-type mime-type (U string? bytes?) #"text/xml; charset=utf-8"]
+                            [#:headers headers (alistof symbol? string?) no-cache-http-headers]
+                            [content csv?]) response/full?]{
 Takes a @scheme[csv] content and wraps it in an HTTP response object that can be used with the PLT web server (including procedures such as @scheme[send/suspend] and @scheme[send/suspend/dispatch]). The keyword arguments correspond to the first five arguments of @scheme[make-response/full].}
