@@ -133,4 +133,4 @@ and the one-argument form expands to:
   (xml->string
    (xml ,@(for/list ([item (in-range 1 4)])
             (define class (if (even? item) "even" #f))
-            (xml (li (\@ ,(opt-xml-attr class)) "Item " ,item)))))]}}
+            (xml (li (\@ ,(opt-xml-attr class)) "Item " ,item)))))]}

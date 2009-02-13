@@ -20,3 +20,6 @@
 (define required-core-version "4.1.4.3")
 
 (define repositories '("4.x"))
+
+(define compile-omit-files
+  '("sql"))
