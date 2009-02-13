@@ -6,9 +6,7 @@
   '("Languages for the programatic assembly of XML, Javascript and CSV data."))
 
 (define release-notes
-  '((p "Changes:")
-    (ul (li "fixed Schemeunit version number;")
-        (li "updated docs to PLT 4.1.3."))))
+  '((p "Updated to PLT 4.1.4.3.")))
 
 (define primary-file
   "mirrors.ss")
@@ -19,7 +17,7 @@
 
 (define categories '(devtools net ui xml))
 
-(define required-core-version "4.1.3")
+(define required-core-version "4.1.4.3")
 
 (define repositories '("4.x"))
 
