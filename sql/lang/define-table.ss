@@ -1,9 +1,10 @@
 #lang scheme/base
 
+(require "../../base.ss")
+
 (require (for-syntax scheme/base
-                     (planet cce/scheme:1/syntax)
-                     (planet untyped/unlib:3/syntax))
-         (planet untyped/unlib:3/debug)
+                     (unlib-in syntax))
+         (unlib-in debug)
          "struct.ss"
          "type.ss")
 

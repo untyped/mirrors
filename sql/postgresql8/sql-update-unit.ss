@@ -1,9 +1,9 @@
 #lang scheme/unit
 
-(require mzlib/etc
-         srfi/13/string
-         (planet untyped/unlib:3/symbol)
-         "../base.ss"
+(require "../base.ss")
+
+(require srfi/13
+         (unlib-in symbol)
          "../era/era.ss"
          "../generic/sql-data-sig.ss"
          "../generic/sql-name-sig.ss"

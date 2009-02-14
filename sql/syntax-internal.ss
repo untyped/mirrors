@@ -1,10 +1,8 @@
 #lang scheme/base
 
-(require scheme/match
-         srfi/13/string
-         srfi/26/cut
-         (planet untyped/unlib:3/syntax)
-         "../base.ss"
+(require "../base.ss")
+
+(require (unlib-in syntax)
          (prefix-in sql: "sql-lang.ss")
          "sql-struct.ss"
          "sql-syntax-util.ss"

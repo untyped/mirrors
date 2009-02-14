@@ -1,9 +1,10 @@
 #lang scheme/base
 
+(require "../../base.ss")
+
 (require (for-syntax scheme/base)
-         (only-in srfi/1 append-map)
-         (planet untyped/unlib:3/symbol)
-         "../../base.ss"
+         scheme/list
+         (unlib-in symbol)
          "struct.ss"
          "type.ss")
 

@@ -1,9 +1,9 @@
 #lang scheme/base
 
+(require "../base.ss")
+
 (require scheme/unit
-         srfi/19
-         srfi/26
-         (planet schematics/spgsql:2/spgsql)
+         (spgsql-in spgsql)
          "../test-base.ss"
          "../test-data.ss"
          "../test-util.ss"

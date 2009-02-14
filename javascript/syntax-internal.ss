@@ -1,11 +1,9 @@
 #lang scheme/base
 
-(require scheme/match
-         (planet dherman/javascript:8/config)
-         (planet untyped/unlib:3/log)
-         (planet untyped/unlib:3/syntax)
-         (planet untyped/unlib:3/symbol)
-         "../base.ss"
+(require "../base.ss")
+
+(require (javascript-in config)
+         (unlib-in [log syntax symbol])
          "expander.ss"
          "op.ss"
          "struct.ss"

@@ -1,15 +1,25 @@
 #lang scheme/base
-  
+
+; Require/provide aliases ------------------------
+
+(require (planet untyped/unlib:3/require))
+
+(define-library-aliases javascript (planet dherman/javascript:8)    #:provide)
+(define-library-aliases pprint     (planet dherman/pprint:4)        #:provide)
+(define-library-aliases schemeunit (planet schematics/schemeunit:3) #:provide)
+(define-library-aliases spgsql     (planet schematics/spgsql:2)     #:provide)
+(define-library-aliases unlib      (planet untyped/unlib:3)         #:provide)
+
 (require net/url
          scheme/contract
          scheme/match
+         scheme/pretty
          srfi/19
          srfi/26
-         (planet untyped/unlib:3/debug)
-         (planet untyped/unlib:3/exn)
-         (planet untyped/unlib:3/time))
+         web-server/servlet
+         (unlib-in [debug exn time]))
 
-; Configuration --------------------------------
+; Configuration ----------------------------------
 
 ; (parameter boolean)
 ;
@@ -25,16 +35,16 @@
 (define current-time-format
   (make-parameter "~Y-~m-~d ~H:~M:~S"))
 
-; Provide statements --------------------------- 
+; Provide statements -----------------------------
 
 (provide (all-from-out net/url
                        scheme/contract
                        scheme/match
+                       scheme/pretty
                        srfi/19
                        srfi/26
-                       (planet untyped/unlib:3/debug)
-                       (planet untyped/unlib:3/exn)
-                       (planet untyped/unlib:3/time)))
+                       web-server/servlet)
+         (unlib-out [debug time exn]))
 
 (provide/contract
  [prevent-quoting-errors? (-> boolean?)]

@@ -1,9 +1,8 @@
 #lang scheme/unit
 
-(require scheme/match
-         (planet untyped/unlib:3/time)
-         (planet untyped/unlib:3/profile)
-         "../base.ss"
+(require "../../base.ss")
+
+(require (unlib-in [time profile])
          "../era/era.ss"
          "../sql/sql-struct.ss"
          "sql-data-sig.ss"

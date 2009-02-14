@@ -1,12 +1,8 @@
 #lang scheme/base
 
-(require scheme/contract
-         scheme/match
-         srfi/19/time
-         srfi/26/cut
-         (planet untyped/unlib:3/list)
-         (planet untyped/unlib:3/symbol)
-         "../../base.ss"
+(require "../../base.ss")
+
+(require (unlib-in [list symbol])
          "lang-internal.ss"
          "struct.ss"
          "type.ss")

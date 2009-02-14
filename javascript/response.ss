@@ -1,8 +1,8 @@
 #lang scheme/base
 
-(require scheme/contract
-         web-server/servlet
-         (planet untyped/unlib:3/bytes)
+(require "../base.ss")
+
+(require (unlib-in bytes)
          "../plain/util.ss"
          "render.ss"
          "struct.ss")

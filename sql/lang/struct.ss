@@ -1,9 +1,9 @@
 #lang scheme/base
 
+(require "../../base.ss")
+
 (require (only-in scheme/list remove-duplicates)
-         (planet untyped/unlib:3/time)
-         (planet untyped/unlib:3/symbol)
-         "../../base.ss"
+         (unlib-in [time symbol])
          "struct-internal.ss"
          "type.ss")
 

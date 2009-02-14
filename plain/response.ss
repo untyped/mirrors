@@ -1,9 +1,8 @@
 #lang scheme/base
 
-(require web-server/servlet
-         (planet untyped/unlib/bytes)
-         (planet untyped/unlib/number)
-         "../base.ss"
+(require "../base.ss")
+
+(require (unlib-in [bytes number])
          "util.ss")
 
 ; Procedures -------------------------------------

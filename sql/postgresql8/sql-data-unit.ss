@@ -1,11 +1,10 @@
 #lang scheme/unit
 
-(require srfi/13
-         srfi/19
-         (only-in srfi/43 vector-map)
-         (planet schematics/spgsql:2/spgsql)
-         (planet untyped/unlib:3/time)
-         "../base.ss"
+(require "../base.ss")
+
+(require (only-in srfi/43 vector-map)
+         (spgsql-in spgsql)
+         (unlib-in time)
          "../era/era.ss"
          "../generic/sql-data-sig.ss")
 

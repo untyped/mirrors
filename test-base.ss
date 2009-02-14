@@ -1,13 +1,12 @@
 #lang scheme/base
 
+(require "base.ss")
+
 (require web-server/servlet
-         (planet schematics/schemeunit:3)
-         (planet schematics/schemeunit:3/text-ui)
-         "base.ss")
+         (schemeunit-in [main text-ui]))
 
 ; Provide statements -----------------------------
 
 (provide (all-from-out web-server/servlet
-                       (planet schematics/schemeunit:3)
-                       (planet schematics/schemeunit:3/text-ui)
-                       "base.ss"))
+                       "base.ss")
+         (schemeunit-out [main text-ui]))

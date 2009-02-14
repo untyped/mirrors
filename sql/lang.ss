@@ -1,14 +1,9 @@
 #lang scheme/base
 
+(require "../base.ss")
+
 (require (for-syntax scheme/base)
-         mzlib/kw
-         scheme/contract
-         scheme/match
-         srfi/19/time
-         srfi/26/cut
-         (planet untyped/unlib:3/list)
-         (planet untyped/unlib:3/symbol)
-         "../base.ss"
+         (unlib-in [list symbol])
          "../era/era.ss"
          "sql-struct.ss"
          "sql-util.ss")
@@ -103,7 +98,7 @@
     (cond [(expression? distinct*) (list distinct*)]
           [(eq? distinct* #t) (list)]
           [(eq? distinct* #f) #f]
-          [else (raise-select-exn #:distinct "(U expression (listof expression) #t #f)" distinct*)]))
+          [else (raise-select-exn '#:distinct "(U expression (listof expression) #t #f)" distinct*)]))
   
   ; (listof expression-alias)
   (define group
@@ -111,30 +106,30 @@
   
   ; Check #:from:
   (unless (source? from)
-    (raise-select-exn #:from "source" from))
+    (raise-select-exn '#:from "source" from))
   
   ; Check #:where:
   (unless (or (expression? where) (not where))
-    (raise-select-exn #:where "(U expression #f)" where))
+    (raise-select-exn '#:where "(U expression #f)" where))
   
   ; Check #:group:
   (unless (and (list? group) (andmap expression? group))
-    (raise-select-exn #:group "(listof expression)" group))
+    (raise-select-exn '#:group "(listof expression)" group))
   
   ; Check #:order:
   (unless (and (list? order) (andmap order? order))
-    (raise-select-exn #:order "(listof order)" order))
+    (raise-select-exn '#:order "(listof order)" order))
   
   (unless (or (expression? having) (not having))
-    (raise-select-exn #:having "(U expression #f)" having))
+    (raise-select-exn '#:having "(U expression #f)" having))
   
   ; Check #:limit:
   (unless (or (integer? limit) (not limit))
-    (raise-select-exn #:limit "(U integer #f)" limit))
+    (raise-select-exn '#:limit "(U integer #f)" limit))
   
   ; Check #:offset:
   (unless (or (integer? offset) (not offset))
-    (raise-select-exn #:offset "(U integer #f)" offset))
+    (raise-select-exn '#:offset "(U integer #f)" offset))
   
   (let*-values (; (listof source-alias)
                 [(sources) (source->sources from)]

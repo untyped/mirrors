@@ -1,12 +1,11 @@
 #lang scheme/base
 
+(require "../base.ss")
+
 (require (for-syntax scheme/base
                      "../base.ss")
-         scheme/contract
-         scheme/match
-         (only-in srfi/1/list append-map)
-         srfi/26/cut
-         (planet untyped/unlib:3/symbol)
+         scheme/list
+         (unlib-in symbol)
          "../base.ss"
          "../era/era.ss"
          "sql-struct.ss")

@@ -1,6 +1,8 @@
 #lang scheme/base
 
-(require (planet untyped/unlib:3/symbol)
+(require "../base.ss")
+
+(require (unlib-in symbol)
          "../persistent-struct-info.ss"
          (for-template scheme/base))
 

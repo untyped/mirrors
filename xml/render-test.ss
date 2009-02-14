@@ -1,13 +1,11 @@
 #lang scheme/base
 
+(require "../test-base.ss")
+
 (require (for-syntax scheme/base
                      "syntax-prerender.ss"
                      "syntax-expand.ss")
-         net/url
-         scheme/pretty
-         srfi/19
-         (planet untyped/unlib/time)
-         "../test-base.ss"
+         (unlib-in time)
          "../javascript/javascript.ss"
          "expander.ss"
          "render.ss"

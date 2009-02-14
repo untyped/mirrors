@@ -1,9 +1,12 @@
 #lang scheme/base
 
-(require scheme/contract
-         (only-in (planet dherman/javascript:8/ast) SourceElement? Property?)
-         (planet dherman/javascript:8/private/syntax/ast-core)
-         (planet dherman/javascript:8/private/syntax/token))
+(require "../base.ss")
+
+(require (only-in (javascript-in ast)
+                  SourceElement?
+                  Property?)
+         (javascript-in [private/syntax/ast-core
+                         private/syntax/token]))
 
 ; Structures -------------------------------------
 
@@ -30,8 +33,7 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out (planet dherman/javascript:8/ast)
-                       (planet dherman/javascript:8/private/syntax/ast-core)))
+(provide (javascript-out [ast private/syntax/ast-core]))
 
 (provide/contract
  [struct (BeginStatement Statement) ([location (or/c region? false/c)]
