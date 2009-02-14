@@ -10,32 +10,53 @@
       (string? datum)
       (bytes? datum)))
 
+; regexp
+; 
+; See also: http://www.w3.org/TR/REC-xml/#NT-NameStartChar
+;      and: http://www.w3.org/TR/REC-xml/#NT-NameChar
+(define xml-identifier-regexp
+  (let* ([name-start-char (string-append ":"
+                                         "A-Z"
+                                         "_"
+                                         "a-z"
+                                         "\xC0-\xD6"
+                                         "\xD8-\xF6"
+                                         "\xF8-\u2FF"
+                                         "\u370-\u37D"
+                                         "\u37F-\u1FFF"
+                                         "\u200C-\u200D"
+                                         "\u2070-\u218F"
+                                         "\u2C00-\u2FEF"
+                                         "\u3001-\uD7FF"
+                                         "\uF900-\uFDCF"
+                                         "\uFDF0-\uFFFD"
+                                         "\U10000-\UEFFFF")]
+         [name-char       (string-append name-start-char
+                                         "."
+                                         "0-9"
+                                         "\xB7"
+                                         "\u0300-\u036F"
+                                         "\u203F-\u2040"
+                                         "-")])
+    (regexp (format "^[~a][~a]*$" name-start-char name-char))))
+
 ; syntax -> boolean
-(define (tag-identifier? stx)
+(define (xml-identifier? stx)
   (and (identifier? stx)
-       ; Must start with a letter, an underscore or a colon:
-       (regexp-match #rx"^[a-zA-Z_:]" (symbol->string (syntax->datum stx)))
+       (regexp-match xml-identifier-regexp (symbol->string (syntax->datum stx)))
+       (or (not (prevent-quoting-errors?))
+           (not (memq (syntax->datum stx) '(xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr js opt-js))))
        #t))
 
 ; syntax -> string
-(define (tag->string stx)
+(define (identifier->string stx)
   (symbol->string (syntax->datum stx)))
-
-; syntax syntax -> void
-(define (prevent-bad-tag-syntax tag-stx expr-stx)
-  (unless (tag-identifier? tag-stx)
-    (raise-syntax-error #f "not a valid tag name" expr-stx tag-stx))
-  (when (prevent-quoting-errors?)
-    (cond [(memq (syntax->datum tag-stx) '(xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr))
-           (raise-syntax-error #f "xml block found in xml output" expr-stx)]
-          [(memq (syntax->datum tag-stx) '(js opt-js))
-           (raise-syntax-error #f "javascript block found in xml output" expr-stx)])))
 
 ; Provide statements -----------------------------
 
 (provide/contract
  [quotable-literal?      (-> syntax? boolean?)]
- [tag-identifier?        (-> syntax? boolean?)]
- [tag->string            (-> syntax? string?)]
- [prevent-bad-tag-syntax (-> syntax? syntax? void?)])
+ [xml-identifier-regexp  regexp?]
+ [xml-identifier?        (-> syntax? boolean?)]
+ [identifier->string     (-> syntax? string?)])
  

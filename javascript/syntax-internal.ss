@@ -42,7 +42,7 @@
                                          #f
                                          (list #,@(map expand-identifier (syntax->list #'(arg ...))))
                                          (list #,@(map expand-javascript (syntax->list #'(stmt ...)))))]
-    [(function any ...)               (raise-syntax-error #f "bad syntax" (syntax->datum stx))]))
+    [(function any ...)               (raise-syntax-error #f "bad JS syntax" (syntax->datum stx))]))
 
 ; syntax -> syntax
 (define (expand-initializer stx)
@@ -53,7 +53,7 @@
     [(id expr)               (identifier? #'id)
                              #`(make-VariableInitializer #f #,(expand-identifier #'id) #,(expand-expression #'expr))]
     [((unquote id) expr)     #`(make-VariableInitializer #f id #,(expand-expression #'expr))]
-    [any                     (raise-syntax-error #f "bad syntax" (syntax->datum stx))]))
+    [any                     (raise-syntax-error #f "bad JS syntax" (syntax->datum stx))]))
 
 ; syntax [boolean] -> syntax
 (define (expand-statement stx [quote-expression? #t])
@@ -77,7 +77,7 @@
                                            #,(expand-expression #'expr)
                                            #,(expand-statement #'pos)
                                            #,(expand-statement #'neg))]
-    [(if arg ...)                       (raise-syntax-error #f "bad syntax" stx)]
+    [(if arg ...)                       (raise-syntax-error #f "bad JS syntax" stx)]
     [(do stmt ...)                      #`(js:do       #,@(expand-do-arguments (syntax->list #'(stmt ...))))]
     [(while expr stmt ...)              #`(js:while    #,(expand-expression #'expr)
                                                        #,@(map expand-statement (syntax->list #'(stmt ...))))]
@@ -85,20 +85,20 @@
                                                        #,@(expand-for-test #'test)
                                                        #,@(expand-for-incr #'incr)
                                                        #,@(map expand-statement (syntax->list #'(stmt ...))))]
-    [(for (arg ...) stmt ...)           (raise-syntax-error #f "bad for arguments" stx)]
+    [(for (arg ...) stmt ...)           (raise-syntax-error #f "bad JS for arguments" stx)]
     [(for-in (item container) stmt ...) #`(js:for-in   #,(expand-for-in-item #'item) 
                                                        #,(expand-expression #'container)
                                                        #,@(map expand-statement (syntax->list #'(stmt ...))))]
-    [(for-in (arg ...) stmt ...)        (raise-syntax-error #f "bad for-in arguments" stx)]
+    [(for-in (arg ...) stmt ...)        (raise-syntax-error #f "bad JS for-in arguments" stx)]
     [(break)                            #`(make-BreakStatement #f #f)]
     [(break label)                      #`(make-BreakStatement #f #,(expand-identifier #'label))]
-    [(break arg ...)                    (raise-syntax-error #f "bad syntax" stx)]
+    [(break arg ...)                    (raise-syntax-error #f "bad JS syntax" stx)]
     [(continue)                         #`(make-ContinueStatement #f #f)]
     [(continue label)                   #`(make-ContinueStatement #f #,(expand-identifier #'label))]
-    [(continue arg ...)                 (raise-syntax-error #f "bad syntax" stx)]
+    [(continue arg ...)                 (raise-syntax-error #f "bad JS syntax" stx)]
     [(return)                           #`(make-ReturnStatement #f #f)]
     [(return expr)                      #`(make-ReturnStatement #f #,(expand-expression #'expr))]
-    [(return arg ...)                   (raise-syntax-error #f "bad syntax" stx)]
+    [(return arg ...)                   (raise-syntax-error #f "bad JS syntax" stx)]
     [(with expr stmt ...)               #`(js:with     #,(expand-expression #'expr)
                                                        #,@(map expand-statement (syntax->list #'(stmt ...))))]
     [(switch expr clause ...)           #`(js:switch   #,(expand-expression #'expr)
@@ -107,14 +107,14 @@
                                            #f
                                            #,(expand-identifier #'label)
                                            #,(expand-statement #'stmt))]
-    [(!label arg ...)                   (raise-syntax-error #f "bad syntax" stx)]
+    [(!label arg ...)                   (raise-syntax-error #f "bad JS syntax" stx)]
     [(throw expr)                       #`(make-ThrowStatment #f #,(expand-expression #'expr))]
-    [(throw arg ...)                    (raise-syntax-error #f "bad syntax" stx)]
+    [(throw arg ...)                    (raise-syntax-error #f "bad JS syntax" stx)]
     [(try stmt+clause ...)              #`(make-TryStatement #f #,@(expand-try-clauses #'(stmt+clause ...)))]
     [(unquote stmt)                     #`(quote-statement stmt)]
-    [(unquote arg ...)                  (raise-syntax-error #f "bad syntax" stx)]
+    [(unquote arg ...)                  (raise-syntax-error #f "bad JS syntax" stx)]
     [(unquote-splicing stmt-list)       #`(wrap-begin stmt-list)]
-    [(unquote-splicing arg ...)         (raise-syntax-error #f "bad syntax" stx)]
+    [(unquote-splicing arg ...)         (raise-syntax-error #f "bad JS syntax" stx)]
     [expr                               (if quote-expression?
                                             #`(make-ExpressionStatement #f #,(expand-expression #'expr))
                                             (expand-expression #'expr))]))
@@ -122,9 +122,7 @@
 ; syntax -> (listof syntax)
 (define (expand-do-arguments stx)
   (with-handlers ([exn:fail? (lambda (exn)
-                               (error "while: bad arguments: ~a. Arguments were: ~s" 
-                                      (exn-message exn) 
-                                      (syntax->datum stx)))])
+                               (raise-syntax-error #f (format "bad JS syntax: ~a" (exn-message exn)) stx))])
     (let loop ([stx stx] [accum null] [while-found? #f])
       (syntax-case stx ()
         [() 
@@ -172,12 +170,12 @@
     [(var id)      (identifier? #'id)
                    (expand-declaration #'(var id))]
     [(var any ...) (identifier? #'id)
-                   (raise-syntax-error #f "bad for-in declaration: initial values not allowed" stx)]
+                   (raise-syntax-error #f "bad JS for-in declaration: initial values not allowed" stx)]
     [(id1 id2)     (and (identifier? #'id1) (identifier? #'id2))
                    (expand-expression #'(!all id1 id2))]
     [id            (identifier? #'id)
                    (expand-expression #'(!all id))]
-    [any           (raise-syntax-error #f "bad for-in declaration" stx)]))
+    [any           (raise-syntax-error #f "bad JS for-in declaration" stx)]))
 
 ; syntax -> syntax
 ; TODO : Complete
@@ -210,7 +208,7 @@
   (case (length finally)
     [(0)  #`((make-BlockStatement #f (list #,@(reverse body))) (list #,@(reverse catch)) #f)]
     [(1)  #`((make-BlockStatement #f (list #,@(reverse body))) (list #,@(reverse catch)) #,(car finally))]
-    [else (error (format "Expected zero or one finally clause(s), received ~s" (syntax->datum stx)))]))
+    [else (raise-syntax-error #f "bad JS syntax: too many finally clause(s)" stx)]))
 
 ; syntax -> syntax
 (define (expand-expression stx)
@@ -231,7 +229,7 @@
     [(!index container index)          #`(make-BracketReference #f
                                                                 #,(expand-expression #'container)
                                                                 #,(expand-expression #'index))]
-    [(!index arg ...)                  (raise-syntax-error #f "bad syntax" stx)]
+    [(!index arg ...)                  (raise-syntax-error #f "bad JS syntax" stx)]
     [(!dot expr (!index id index))     #`(make-BracketReference #f (make-DotReference #f
                                                                                       #,(expand-expression #'expr)
                                                                                       #,(expand-identifier #'id)) 
@@ -259,25 +257,25 @@
                                                             #,(expand-identifier #'id))]
     [(!all expr ...)                   #`(js:all #,@(map expand-expression (syntax->list #'(expr ...))))]
     [(? test pos neg)                  #`(make-ConditionalExpression #f #,@(map expand-expression (syntax->list #'(test pos neg))))]
-    [(? arg ...)                       (raise-syntax-error #f "bad syntax" stx)]
+    [(? arg ...)                       (raise-syntax-error #f "bad JS syntax" stx)]
     [(new class expr ...)              #`(make-NewExpression #f
                                                              #,(expand-expression #'class)
                                                              (list #,@(map expand-expression (syntax->list #'(expr ...)))))]
     [(function (arg ...) stmt ...)     #`(make-FunctionExpression #f #f
                                                                   (list #,@(map expand-identifier (syntax->list #'(arg ...)))) 
                                                                   (list #,@(map expand-javascript (syntax->list #'(stmt ...)))))]
-    [(function arg ...)                (raise-syntax-error #f "bad anonymous function syntax" stx)]
+    [(function arg ...)                (raise-syntax-error #f "bad JS syntax" stx)]
     [(unquote expr)                    #`(quote-expression expr)]
-    [(unquote arg ...)                 (raise-syntax-error #f "bad syntax" stx)]
-    [(unquote-splicing stmt-list)      (raise-syntax-error #f "unquote-splicing is only allowed at a statement level" stx)]
-    [(unquote-splicing arg ...)        (raise-syntax-error #f "bad syntax" stx)]
+    [(unquote arg ...)                 (raise-syntax-error #f "bad JS syntax" stx)]
+    [(unquote-splicing stmt-list)      (raise-syntax-error #f "bad JS syntax: unquote-splicing is only allowed at a statement level" stx)]
+    [(unquote-splicing arg ...)        (raise-syntax-error #f "bad JS syntax" stx)]
     ; Prefix and postfix operators:
     [(op expr)                     (or (scheme-prefix-operator? (syntax->datum #'op))
                                        (scheme-postfix-operator? (syntax->datum #'op)))
                                    #`(#,(js:op #'op) #,(expand-expression #'expr))]
     [(op expr ...)                 (or (scheme-prefix-operator? (syntax->datum #'op))
                                        (scheme-postfix-operator? (syntax->datum #'op)))
-                                   (raise-syntax-error #f "one argument only" stx)]
+                                   (raise-syntax-error #f "bad JS syntax: one argument only" stx)]
     ; Infix operators:
     [(op expr ...)                 (infix-operator? (syntax->datum #'op))
                                    #`(#,(js:op #'op) #,@(map expand-expression (syntax->list #'(expr ...))))]
@@ -286,11 +284,11 @@
                                    #`(#,(js:op #'op) #,(expand-expression #'expr1) #,(expand-expression #'expr2))]
     
     [(op expr ...)                 (assignment-operator? (syntax->datum #'op))
-                                   (raise-syntax-error #f "two arguments only" stx)]
+                                   (raise-syntax-error #f "bad JS syntax: two arguments only" stx)]
     ; Function calls (first rule is a hack to get around an expression precedence bug in javascript.plt):
     [((function body ...) arg ...) #`(js:call (make-ParenExpression #f #,(expand-expression #'(function body ...))) #,@(map expand-expression (syntax->list #'(arg ...))))]
     [(quote arg)                   (expand-literal+identifier #'(quote arg))]
-    [(quote arg ...)               (raise-syntax-error #f "one argument only" stx)]
+    [(quote arg ...)               (raise-syntax-error #f "bad JS syntax: one argument only" stx)]
     [(fn arg ...)                  (begin
                                      (prevent-quoting-errors #'fn #'(fn arg ...))
                                      #`(make-CallExpression #f
@@ -300,7 +298,7 @@
     [lit+id                        (or (identifier? #'lit+id)
                                        (quotable-literal? #'lit+id))
                                    (expand-literal+identifier #'lit+id)]
-    [_                             (error (format "bad Javascript syntax: ~s" (syntax->datum stx)))]))
+    [_                             (raise-syntax-error #f "bad JS syntax" stx)]))
 
 ; syntax -> syntax
 (define (expand-field stx)
@@ -329,7 +327,7 @@
                   (if (or (javascript-identifier? #'id)
                           (memq (syntax->datum #'id) '(this null)))
                       #'(js:id (quote id))
-                      (raise-syntax-error #f "bad javascript identifier" stx))]
+                      (raise-syntax-error #f "bad JS syntax: invalid JS identifier" stx))]
     [(unquote id) #'id]))
 
 ; Helpers ----------------------------------------
@@ -375,7 +373,7 @@
        ; Value:
        value-stx]
       [(unquote expr) #'expr]
-      [_ (raise-syntax-error #f "bad argument: expected string literal or unquoted string expression" stx value-stx)]))
+      [_ (raise-syntax-error #f "bad JS syntax: regexp argument: expected string literal or unquoted string expression" stx value-stx)]))
   
   ; syntax -> syntax
   (define (parse-keyword-expr val-stx)
@@ -383,7 +381,7 @@
       [#t val-stx]
       [#f val-stx]
       [(unquote expr) #'expr]
-      [_ (raise-syntax-error #f "bad keyword argument: expected boolean literal or unquoted boolean expression" stx val-stx)]))
+      [_ (raise-syntax-error #f "bad JS: regexp argument: expected boolean literal or unquoted boolean expression" stx val-stx)]))
   
   ; -> syntax
   (define (parse-end)
@@ -401,12 +399,12 @@
       [() (parse-end)]
       [(#:global? expr rest ...)
        (begin (if global-stx
-                  (raise-syntax-error #f "#:global? keyword specified more than once" stx #'expr)
+                  (raise-syntax-error #f "bad JS syntax: too many #:global? keywords" stx #'expr)
                   (set! global-stx (parse-keyword-expr #'expr)))
               (parse-keywords #'(rest ...)))]
       [(#:ci? expr rest ...)
        (begin (if ci-stx
-                  (raise-syntax-error #f "#:ci? keyword specified more than once" stx #'expr)
+                  (raise-syntax-error #f "bad JS syntax: too many #:ci? keywords" stx #'expr)
                   (set! ci-stx (parse-keyword-expr #'expr)))
               (parse-keywords #'(rest ...)))]
       [(kw expr rest ...)
@@ -423,9 +421,9 @@
 (define (prevent-quoting-errors fn-stx expr-stx)
   (when (prevent-quoting-errors?)
     (cond [(memq (syntax->datum fn-stx) '(xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr))
-           (raise-syntax-error #f "xml block found in javascript output" expr-stx)]
+           (raise-syntax-error #f "bad JS syntax: XML block found in JS output" expr-stx)]
           [(memq (syntax->datum fn-stx) '(js opt-js))
-           (raise-syntax-error #f "javascript block found in javascript output" expr-stx)])))
+           (raise-syntax-error #f "bad JS syntax: JS block found in JS output" expr-stx)])))
 
 ; Provide statements -----------------------------
 

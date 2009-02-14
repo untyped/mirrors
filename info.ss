@@ -7,8 +7,8 @@
 
 (define release-notes
   '((p "Changes:")
-    (ul (li "fixed Schemeunit version number;")
-        (li "updated docs to PLT 4.1.3."))))
+    (ul (li "the XML and Javascript languages now have improved error messages;")
+        (li "the XML language now checks for badly formed tag and attribute names."))))
 
 (define primary-file
   "mirrors.ss")
