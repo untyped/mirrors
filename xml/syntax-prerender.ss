@@ -34,12 +34,16 @@
     [((unquote-splicing expr) other ...)
      (cons #'(attributes->raw expr) (prerender-attributes #'(other ...)))]
     [([name (unquote expr)] other ...)
-     (let ([name (tag->string #'name)])
-       (append (list " " name "=\"" #'(quote-javascript-attribute-value expr) "\"") (prerender-attributes #'(other ...))))]
+     (if (xml-identifier? #'name)
+         (let ([name (identifier->string #'name)])
+           (append (list " " name "=\"" #'(quote-javascript-attribute-value expr) "\"") (prerender-attributes #'(other ...))))
+         (raise-syntax-error 'mirrors/xml "invalid XML attribute name" #'name))]
     [([name value] other ...)
-     (let ([name  (tag->string #'name)]
-           [value (prerender-literal #'value)])
-       (append `(" " ,name "=\"" ,@value "\"") (prerender-attributes #'(other ...))))]
+     (if (xml-identifier? #'name)
+         (let ([name  (identifier->string #'name)]
+               [value (prerender-literal #'value)])
+           (append `(" " ,name "=\"" ,@value "\"") (prerender-attributes #'(other ...))))
+         (raise-syntax-error 'mirrors/xml "invalid XML attribute name" #'name))]
     [() null]))
 
 ; syntax -> (listof (U syntax string))
@@ -69,14 +73,15 @@
 (define (prerender-entity stx)
   (syntax-case* stx (unquote) symbolic-identifier=?
     [(unquote val) (list #'(make-entity val))]
-    [_ (let ([datum (syntax->datum stx)])
-         (cond [(symbol? datum)
-                (list (format "&~a;" datum))]
-               [(integer? datum)
-                (if (> datum 0)
-                    (list (format "&#~a;" datum))
-                    (raise-exn exn:fail:contract
-                      (format "Expected (U symbol natural unquote-expression), received ~a" datum)))]))]))
+    [_             (let ([datum (syntax->datum stx)])
+                     (cond [(symbol? datum)
+                            (list (format "&~a;" datum))]
+                           [(and (integer? datum) (>= datum 0))
+                            (list (format "&#~a;" datum))]
+                           [else (raise-syntax-error
+                                  'mirrors/xml
+                                  "bad XML entity value: expected (U symbol natural unquote-expression)"
+                                  stx)]))]))
 
 ; syntax -> (listof (U syntax string))
 (define (prerender-node stx)
@@ -87,44 +92,45 @@
                                       [(xml  expr ...) (append-map prerender-node (syntax->list #'(expr ...)))]
                                       [(xml* expr ...) (append-map prerender-node (syntax->list #'(expr ...)))]))]
     [(quote expr)                 (prerender-literal #'(quote expr))]
-    [(quote expr ...)             (raise-syntax-error #f "only one argument allowed" stx)]
+    [(quote expr ...)             (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
     [(unquote expr)               (prerender-literal #'(unquote expr))]
-    [(unquote expr ...)           (raise-syntax-error #f "only one argument allowed" stx)]
+    [(unquote expr ...)           (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
     [(unquote-splicing expr)      (prerender-literal #'(unquote-splicing expr))]
-    [(unquote-splicing expr ...)  (raise-syntax-error #f "only one argument allowed" stx)]
+    [(unquote-splicing expr ...)  (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
     [(!raw expr ...)              (prerender-raw #'(expr ...))]
     [(!comment expr ...)          (prerender-comment #'(expr ...))]
     [(!cdata expr ...)            (prerender-cdata #'(expr ...))]
     [(!pi expr ...)               (prerender-pi #'(expr ...))]
     [(& expr)                     (prerender-entity #'expr)]
-    [(& expr ...)                 (raise-syntax-error #f "only one argument allowed" stx)]
-    [(tag)                        (identifier? #'tag)
-                                  (let ([tag-str (tag->string #'tag)])
-                                    (prevent-bad-tag-syntax #'tag #'(tag))
-                                    (if (preserve-singletons? (string->symbol tag-str))
-                                        `("<" ,tag-str "></" ,tag-str ">")
-                                        `("<" ,tag-str " />")))]
-    [(tag (@ attr ...))           (identifier? #'tag)
-                                  (let ([tag-str (tag->string #'tag)]
-                                        [attrs   (prerender-attributes #'(attr ...))])        
-                                    (prevent-bad-tag-syntax #'tag #'(tag (@ attr ...)))
-                                    (if (preserve-singletons? (string->symbol tag-str))
-                                        `("<" ,tag-str ,@attrs "></" ,tag-str ">")
-                                        `("<" ,tag-str ,@attrs " />")))]
-    [(tag (@ attr ...) child ...) (identifier? #'tag)
-                                  (let ([tag-str  (tag->string #'tag)]
-                                        [attrs    (prerender-attributes #'(attr ...))]
-                                        [children (append-map prerender-node (syntax->list #'(child ...)))])
-                                    (prevent-bad-tag-syntax #'tag #'(tag (@ attr ...) child ...))
-                                    `("<" ,tag-str ,@attrs ">" ,@children "</" ,tag-str ">"))]
-    [(tag child ...)              (identifier? #'tag)
-                                  (let ([tag-str  (tag->string #'tag)]
-                                        [children (append-map prerender-node (syntax->list #'(child ...)))])
-                                    (prevent-bad-tag-syntax #'tag #'(tag child ...))
-                                    `("<" ,tag-str ">" ,@children "</" ,tag-str ">"))]
+    [(& expr ...)                 (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
+    [(tag)                        (if (xml-identifier? #'tag)
+                                      (let ([tag-str (identifier->string #'tag)])
+                                        (if (preserve-singletons? (string->symbol tag-str))
+                                            `("<" ,tag-str "></" ,tag-str ">")
+                                            `("<" ,tag-str " />")))
+                                      (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [(tag (@ attr ...))           (if (xml-identifier? #'tag)
+                                      (let ([tag-str (identifier->string #'tag)]
+                                            [attrs   (prerender-attributes #'(attr ...))])        
+                                        (if (preserve-singletons? (string->symbol tag-str))
+                                            `("<" ,tag-str ,@attrs "></" ,tag-str ">")
+                                            `("<" ,tag-str ,@attrs " />")))
+                                      (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [(tag (@ attr ...) child ...) (if (xml-identifier? #'tag)
+                                      (let ([tag-str  (identifier->string #'tag)]
+                                            [attrs    (prerender-attributes #'(attr ...))]
+                                            [children (append-map prerender-node (syntax->list #'(child ...)))])
+                                        `("<" ,tag-str ,@attrs ">" ,@children "</" ,tag-str ">"))
+                                      (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [(tag child ...)              (if (xml-identifier? #'tag)
+                                      (let ([tag-str  (identifier->string #'tag)]
+                                            [children (append-map prerender-node (syntax->list #'(child ...)))])
+                                        `("<" ,tag-str ">" ,@children "</" ,tag-str ">"))
+                                      (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [([_ ...] ...)                (raise-syntax-error 'mirrors/xml "bad XML syntax" stx)]
     [expr                         (prerender-literal #'expr)]))
 
-; syntax -> syntax
+; syntax syntax -> syntax
 (define (prerender-block stx)
   ; (U syntax string) boolean -> syntax
   (define (wrap item)

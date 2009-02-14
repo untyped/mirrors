@@ -29,10 +29,12 @@
     (syntax-case* stx (unquote unquote-splicing) symbolic-identifier=?
       [((unquote expr) other ...)          (cons #'(unquote expr) (loop #'(other ...)))]
       [((unquote-splicing expr) other ...) (cons #'(unquote-splicing expr) (loop #'(other ...)))]
-      [([name (unquote value)] other ...)  (identifier? #'name)
-                                           (cons #'(unquote (make-attribute 'name value)) (loop #'(other ...)))]
-      [([name value] other ...)            (identifier? #'name)
-                                           (cons #`(unquote (make-attribute 'name #,(expand-literal #'value))) (loop #'(other ...)))]
+      [([name (unquote value)] other ...)  (if (xml-identifier? #'name)
+                                               (cons #'(unquote (make-attribute 'name value)) (loop #'(other ...)))
+                                               (raise-syntax-error 'mirrors/xml "invalid XML attribute name" #'name))]
+      [([name value] other ...)            (if (xml-identifier? #'name)
+                                               (cons #`(unquote (make-attribute 'name #,(expand-literal #'value))) (loop #'(other ...)))
+                                               (raise-syntax-error 'mirrors/xml "invalid XML attribute name" #'name))]
       [()                                  null]))
   ;; syntax
   #`(quasiquote (#,@(loop stx))))
@@ -62,12 +64,15 @@
 (define (expand-entity stx)
   (syntax-case* stx (unquote) symbolic-identifier=?
     [(unquote val) #'(make-entity val)]
-    [val (let ([datum (syntax->datum stx)])
-           (cond [(symbol? datum)  #'(make-entity 'val)]
-                 [(integer? datum) (if (> datum 0)
-                                       #'(make-entity val)
-                                       (raise-exn exn:fail:contract
-                                         (format "Expected (U symbol positive-integer unquote-expression), received ~a" datum)))]))]))
+    [val           (let ([datum (syntax->datum stx)])
+                     (cond [(symbol? datum)
+                            #'(make-entity 'val)]
+                           [(and (integer? datum) (>= datum 0))
+                            #'(make-entity val)]
+                           [else (raise-syntax-error
+                                  'mirrors/xml
+                                  "bad XML entity code: expected (U symbol natural unquote-expression)"
+                                  stx)]))]))
 
 ; syntax -> syntax
 (define (expand-node stx)
@@ -78,26 +83,24 @@
                                             [(xml  expr ...) (expand-block #'(expr ...))]
                                             [(xml* expr ...) (expand-block #'(expr ...))]))]
     [(quote expr)                       (expand-literal #'(quote expr))]
-    [(quote expr ...)                   (raise-syntax-error #f "only one argument allowed" stx)]
+    [(quote expr ...)                   (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
     [(unquote expr)                     (expand-literal #'(unquote expr))]
-    [(unquote expr ...)                 (raise-syntax-error #f "only one argument allowed" stx)]
+    [(unquote expr ...)                 (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
     [(unquote-splicing expr)            (expand-literal #'(unquote-splicing expr))]
-    [(unquote-splicing expr ...)        (raise-syntax-error #f "only one argument allowed" stx)]
+    [(unquote-splicing expr ...)        (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
     [(!raw expr ...)                    (expand-raw #'(expr ...))]
     [(!comment expr ...)                (expand-comment #'(expr ...))]
     [(!cdata expr ...)                  (expand-cdata #'(expr ...))]
     [(!pi expr ...)                     (expand-pi #'(expr ...))]
     [(& expr)                           (expand-entity #'expr)]
-    [(& expr ...)                       (raise-syntax-error #f "only one argument allowed" stx)]
-    [(tag (@ [name val] ...) child ...) (identifier? #'tag)
-                                        (begin
-                                          (prevent-bad-tag-syntax #'tag #'(tag (@ [name val] ...) child ...))
-                                          #`(make-element 'tag
-                                                          #,(expand-attributes #'([name val] ...))
-                                                          #,(expand-block #'(child ...))))]
-    [(tag child ...)                    (identifier? #'tag)
-                                        (begin (prevent-bad-tag-syntax #'tag #'(tag child ...))
-                                               #`(make-element 'tag null #,(expand-block #'(child ...))))]
+    [(& expr ...)                       (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
+    [(tag (@ [name val] ...) child ...) (if (xml-identifier? #'tag)
+                                            #`(make-element 'tag #,(expand-attributes #'([name val] ...)) #,(expand-block #'(child ...)))
+                                            (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [(tag child ...)                    (if (xml-identifier? #'tag)
+                                            #`(make-element 'tag null #,(expand-block #'(child ...)))
+                                            (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [([_ ...] ...)                      (raise-syntax-error 'mirrors/xml "bad XML syntax" stx)]
     [expr                               (expand-literal #'expr)]))
 
 ; syntax -> syntax

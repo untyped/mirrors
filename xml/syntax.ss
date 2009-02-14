@@ -43,7 +43,7 @@
      #'(opt-xml-attr test id id)]
     [(opt-xml-attr test id val)
      (begin (unless (identifier? #'id)
-              (raise-syntax-error #f "not an identifier" stx #'id))
+              (raise-syntax-error 'mirrors/xml "invalid XML attribute name" stx #'id))
             #'(if test
                   (xml-attrs [id ,val])
                   (xml-attrs)))]))
