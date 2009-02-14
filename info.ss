@@ -7,8 +7,8 @@
 
 (define release-notes
   '((p "Changes:")
-    (ul (li "the XML and Javascript languages now have improved error messages;")
-        (li "the XML language now checks for badly formed tag and attribute names."))))
+    (ul (li "improved syntax error messages in the XML and Javascript languages;")
+        (li "added checks for badly formed tag and attribute names in the XML language."))))
 
 (define primary-file
   "mirrors.ss")
