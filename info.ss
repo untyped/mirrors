@@ -6,9 +6,8 @@
   '("Languages for the programatic assembly of XML, Javascript and CSV data."))
 
 (define release-notes
-  '((p "Changes:")
-    (ul (li "improved syntax error messages in the XML and Javascript languages;")
-        (li "added checks for badly formed tag and attribute names in the XML language."))))
+  '((p "Changes and additions:")
+    (ul (li "added new XML procedures: " (tt "xml-quotable?") ", " (tt "xml+quotable?") ", " (tt "xml-quote") " and " (tt "xml-empty?") "."))))
 
 (define primary-file
   "mirrors.ss")

@@ -6,6 +6,43 @@
 
 @title[#:tag "xml-util"]{XML utilities}
 
+@defproc[(xml-quotable? [val any]) boolean?]{
+Returns @scheme[#t] if @scheme[val] is a Scheme value that can be converted to XML by Mirrors.
+
+@examples[
+  #:eval xml-eval
+  (xml-quotable? 123)
+  (xml-quotable? (xml 123))
+  (xml-quotable? (box 123))]}
+
+@defproc[(xml+quotable? [val any]) boolean?]{
+Returns @scheme[#t] if @scheme[val] is an xml fragment or a Scheme value that can be converted to XML by Mirrors.
+
+@examples[
+  #:eval xml-eval
+  (xml+quotable? 123)
+  (xml+quotable? (xml 123))
+  (xml+quotable? (box 123))]}
+
+@defproc[(xml-quote [val (U xml? quotable-value?)]) xml?]{
+Turns quotable values into xml fragments. Passes existing xml fragments straight through.
+
+@examples[
+  #:eval xml-eval
+  (equal? (xml-quote 123) (xml ,123))
+  (equal? (xml-quote (xml 123)) (xml 123))]}
+
+@defproc[(xml-empty? [val xml?]) boolean?]{
+Returns @scheme[#t] if @scheme[val] is an XML fragment that will produce no renderable XML source.
+        
+@examples[
+  #:eval xml-eval
+  (xml-empty? (xml))
+  (xml-empty? (xml "Hi"))
+  (xml-empty? (xml ,(xml)))
+  (code:comment "Odd case: #f renders as an empty string:")
+  (xml-empty? (xml #f)) ]}
+
 @defmodule[(planet untyped/mirrors/xml/util)]
 
 The following XML expressions are defined for convenience:

@@ -2,6 +2,8 @@
 
 @(require (file "base.ss"))
 
+@(define-eval xml-eval (planet untyped/mirrors/xml/xml))
+
 @title[#:tag "xml-response"]{Rendering XML and sending XML responses}
 
 @defmodule[(planet untyped/mirrors/xml/xml)]
@@ -9,9 +11,9 @@
 @section{Rendering XML in string form}
 
 @defproc[(xml->string [val xml?]) string?]{
-Renders an XML item as a compact string, with no line breaks and no indentation.}
+Renders an XML item as a compact string, with no line breaks and no indentation.
 
-Mirrors does not contain a procedure for rendering XML as a multi-line string. This is largely because such a facility would be at odds with the pre-rendering behaviour of the @scheme[xml] macro. Please email the author if you feel this feature would be useful. If you want to debug the XML or XHTML output of our web application, you may want to try one of the variety of HTML and XML prettification add-ons that are available for Firefox.
+Mirrors does not contain a procedure for rendering XML as a multi-line string. This is largely because such a facility would be at odds with the pre-rendering behaviour of the @scheme[xml] macro.  If you want to debug the XML or XHTML output of our web application, you may want to try one of the variety of HTML and XML prettification add-ons that are available for Firefox.}
 
 @section{Sending HTTP responses with XML and XHTML content}
 

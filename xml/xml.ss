@@ -12,5 +12,13 @@
                        "syntax.ss"
                        "util.ss")
          define-xml-syntax
-         xml?)
+         xml?
+         xml-quotable?
+         xml+quotable?
+         xml-quote
+         xml-empty?
+         #;xml-size
+         #;xml-raw-size
+         #;xml-depth
+         #;xml-dump)
 

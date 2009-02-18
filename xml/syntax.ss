@@ -10,7 +10,7 @@
 
 (define-syntax (xml stx)
   (syntax-case stx ()
-    [(_ arg ...) #`(quote-xml #,(prerender-block #'(arg ...)))]))
+    [(_ arg ...) #`(xml-quote #,(prerender-block #'(arg ...)))]))
 
 (define-syntax (xml-attrs stx)
   (syntax-case stx ()
@@ -18,7 +18,7 @@
 
 (define-syntax (xml* stx)
   (syntax-case stx ()
-    [(_ arg ...) #`(quote-xml #,(expand-block #'(arg ...)))]))
+    [(_ arg ...) #`(xml-quote #,(expand-block #'(arg ...)))]))
 
 (define-syntax (xml-attrs* stx)
   (syntax-case stx ()

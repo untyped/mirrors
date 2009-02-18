@@ -24,6 +24,17 @@
       (time-utc? val)
       (time-tai? val)))
 
+; any -> boolean
+(define (quotable-value-empty? val)
+  (cond [(string? val)     (string=? val "")]
+        [(symbol? val)     (string=? (symbol->string val) "")]
+        [(bytes? val)      (bytes=? val #"")]
+        [(number? val)     #f]
+        [(boolean? val)    (not val)]
+        [(url? val)        (string=? (url->string val) "")]
+        [(time-utc? val)   #f]
+        [(time-tai? val)   #f]))
+
 ; Helpers ----------------------------------------
 
 ; time-utc -> string
@@ -45,6 +56,7 @@
 (provide/contract
  [quotable-value->string           (->* (quotable-value?) (boolean?) string?)]
  [quotable-value?                  (-> any/c boolean?)]
+ [quotable-value-empty?            (-> quotable-value? boolean?)]
  [time-utc->string                 (-> time-utc? string?)]
  [time-tai->string                 (-> time-tai? string?)])
  
