@@ -39,18 +39,20 @@
 
 ; Custom printers --------------------------------
 
-; BeginStatement -> void
+; BeginStatement -> doc
 (define (format-BeginStatement stmt)
   (match stmt
     [(struct BeginStatement (_ statements))
-     (if (null? statements)
-         (h-append)
-         (h-append (format-substatement (car statements))
-                   (format-map (lambda (statement)
-                                 (h-append line
-                                           (format-substatement statement)))
-                               (cdr statements)
-                               formatters/StatementList)))]))
+     (format-BeginStatement-substatements statements)]))
+
+; (listof statement) -> doc
+(define (format-BeginStatement-substatements statements)
+  (cond [(null? statements)              (h-append)]
+        [(empty-begin? (car statements)) (format-BeginStatement-substatements (cdr statements))]
+        [(null? (cdr statements))        (format-substatement (car statements))]
+        [else                            (h-append (format-substatement (car statements))
+                                                   line
+                                                   (format-BeginStatement-substatements (cdr statements)))]))
 
 ; Provide statements -----------------------------
 

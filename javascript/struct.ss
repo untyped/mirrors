@@ -11,6 +11,11 @@
 
 ; Procedures -------------------------------------
 
+; statement -> void
+(define (empty-begin? stmt)
+  (and (BeginStatement? stmt)
+       (andmap empty-begin? (BeginStatement-statements stmt)))) 
+
 ; any -> boolean
 (define (javascript? item)
   (or (SourceElement? item)
@@ -36,7 +41,8 @@
 (provide/contract
  [struct (BeginStatement Statement) ([location (or/c region? false/c)]
                                      [statements (listof SourceElement?)])]
- [javascript? procedure?]
+ [empty-begin?            procedure?]
+ [javascript?             procedure?]
  [javascript-declaration? procedure?]
- [javascript-statement? procedure?]
- [javascript-expression? procedure?])
+ [javascript-statement?   procedure?]
+ [javascript-expression?  procedure?])

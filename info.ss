@@ -7,7 +7,7 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "added new XML procedures: " (tt "xml-quotable?") ", " (tt "xml+quotable?") ", " (tt "xml-quote") " and " (tt "xml-empty?") "."))))
+    (ul (li "removed extraneous newlines generated when pretty printing empty begin statements."))))
 
 (define primary-file
   "mirrors.ss")
