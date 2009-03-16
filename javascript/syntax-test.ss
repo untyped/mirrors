@@ -14,16 +14,19 @@
 
 (define-syntax (test-js stx)
   (syntax-case stx ()
-    [(_ message actual expected)
+    [(_ message actual expected . flags)
      (with-handlers ([exn? (lambda (exn)
                              #`(test-case message
                                  (fail #,(format "Could not compile javascript: ~a"
                                                  (exn-message exn)))))])
-       (with-syntax ([expanded (expand-javascript #'actual)])
-         #`(test-case message
-             (with-check-info (['compiled expanded])
-               (check-equal? (javascript->string expanded)
-                             expected)))))]))
+       (with-syntax ([js->string
+                      (if (equal? (map syntax->datum (syntax->list #'flags)) '(#:pretty))
+                          #'javascript->pretty-string
+                          #'javascript->string)])
+         (with-syntax ([expanded (expand-javascript #'actual)])
+           #`(test-case message
+               (with-check-info (['compiled expanded])
+                 (check-equal? (js->string expanded) expected))))))]))
 
 (define-javascript-syntax (!var-debug [id expr] ...)
   (js (!begin (var [id expr])
@@ -76,7 +79,16 @@
       (var [,(make-Identifier #f 'x) 1] [y ,(+ 2 3)])
       "var x = 1, y = 5;")
     
-    (test-js "stmt: empty begin" (!begin) "")
+    (test-js "stmt: empty begin"
+      (!begin)
+      ""
+      #:pretty)
+    
+    (test-js "stmt: nested empty begins"
+      (!begin (!begin)
+              (!begin))
+      ""
+      #:pretty)
     
     (test-js "stmt: begin"
       (!begin (+ 1 2 3)
