@@ -6,6 +6,8 @@
          (planet dherman/pprint:4)
          (only-in (planet schematics/schemeunit:3/util)
                   require/expose)
+         (planet untyped/unlib/debug)
+         (planet untyped/unlib/list)
          (planet untyped/unlib/profile)
          "quote.ss"
          "render-fast.ss"
@@ -32,9 +34,7 @@
 (define (javascript->pretty-string js)
   (define quoted-js
     (quote-javascript js))
-  (parameterize ([formatters/Statement
-                  (cons format-BeginStatement
-                        (formatters/Statement))])
+  (parameterize ([formatters/Statement (cons format-BeginStatement (formatters/Statement))])
     (pretty-format (format-term js))))
 
 ; Custom printers --------------------------------
@@ -43,16 +43,24 @@
 (define (format-BeginStatement stmt)
   (match stmt
     [(struct BeginStatement (_ statements))
-     (format-BeginStatement-substatements statements)]))
+     (let ([statements (reverse (collect-begin-substatements statements))])
+       (if (null? statements)
+           (h-append)
+           (h-append (format-substatement (car statements))
+                     (format-map (lambda (statement)
+                                   (h-append line (format-substatement statement)))
+                                 (cdr statements)
+                                 formatters/StatementList))))]))
 
-; (listof statement) -> doc
-(define (format-BeginStatement-substatements statements)
-  (cond [(null? statements)              (h-append)]
-        [(empty-begin? (car statements)) (format-BeginStatement-substatements (cdr statements))]
-        [(null? (cdr statements))        (format-substatement (car statements))]
-        [else                            (h-append (format-substatement (car statements))
-                                                   line
-                                                   (format-BeginStatement-substatements (cdr statements)))]))
+; (listof statement) [(listof doc)] -> (listof statement)
+(define (collect-begin-substatements statements [accum null])
+  (match statements
+    [(list) accum]
+    [(list-rest curr rest)
+     (if (BeginStatement? curr)
+         (collect-begin-substatements rest (collect-begin-substatements (BeginStatement-statements curr) accum))
+         (collect-begin-substatements rest (cons curr accum)))]
+    [other (debug "bad item" other)]))
 
 ; Provide statements -----------------------------
 

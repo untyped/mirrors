@@ -91,10 +91,20 @@
       #:pretty)
     
     (test-js "stmt: nested empty begins"
-      (!begin (alert (+ 1 2 3))
-              (!begin)
+      (!begin (!begin (!begin))
+              (alert (+ 1 2 3))
               (!begin (!begin))
-              (alert (+ 2 3 4)))
+              (alert (+ 2 3 4))
+              (!begin (!begin)))
+      "alert(1 + 2 + 3);\nalert(2 + 3 + 4);"
+      #:pretty)
+    
+    (test-js "stmt: nested non-empty begins"
+      (!begin (!begin (!begin))
+              (alert (+ 1 2 3))
+              (!begin (!begin))
+              (!begin (!begin (alert (+ 2 3 4))))
+              (!begin (!begin)))
       "alert(1 + 2 + 3);\nalert(2 + 3 + 4);"
       #:pretty)
     
