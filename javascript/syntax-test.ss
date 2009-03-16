@@ -79,22 +79,24 @@
       (var [,(make-Identifier #f 'x) 1] [y ,(+ 2 3)])
       "var x = 1, y = 5;")
     
+    (test-js "stmt: begin"
+      (!begin (+ 1 2 3)
+              (!begin (var [x (+ 2 3 4)]))
+              (+ 3 4 5))
+      "1 + 2 + 3; var x = 2 + 3 + 4; 3 + 4 + 5;")
+    
     (test-js "stmt: empty begin"
       (!begin)
       ""
       #:pretty)
     
     (test-js "stmt: nested empty begins"
-      (!begin (!begin)
-              (!begin))
-      ""
+      (!begin (alert (+ 1 2 3))
+              (!begin)
+              (!begin (!begin))
+              (alert (+ 2 3 4)))
+      "alert(1 + 2 + 3);\nalert(2 + 3 + 4);"
       #:pretty)
-    
-    (test-js "stmt: begin"
-      (!begin (+ 1 2 3)
-              (!begin (var [x (+ 2 3 4)]))
-              (+ 3 4 5))
-      "1 + 2 + 3; var x = 2 + 3 + 4; 3 + 4 + 5;")
     
     (test-js "stmt: empty block" (!block) "{}")
     
