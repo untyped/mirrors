@@ -243,6 +243,16 @@
       (!regexp "abc" #:global? #t #:ci? #t)
       "/abc/gi;")
     
+    (test-js "expr: function indentation"
+      (+ 1 2 3 ((function () 
+                 (return (+ 4 5 6)))))
+      #<<ENDSTR
+1 + 2 + 3 + (function() {
+    return 4 + 5 + 6;
+})();
+ENDSTR
+      #:pretty)
+    
     (test-js "really long one-line program"
       (function () 
         ,@(for/list ([x (in-range 0 100)])

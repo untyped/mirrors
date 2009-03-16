@@ -23,25 +23,38 @@
 
 ; javascript -> string
 (define (javascript->string js)
-  (define quoted-js
-    (quote-javascript js))
-  (parameterize ([formatters/Statement
-                  (cons format-BeginStatement
-                        (formatters/Statement))])
-    (pretty-format (group (format-term js)) 1000000000)))
+  (parameterize ([formatters/Expression (cons format-FunctionExpression (formatters/Expression))]
+                 [formatters/Statement  (cons format-BeginStatement (formatters/Statement))])
+    (pretty-format (group (format-term js)) #f)))
 
 ; javascript -> string
 (define (javascript->pretty-string js)
-  (define quoted-js
-    (quote-javascript js))
-  (parameterize ([formatters/Statement (cons format-BeginStatement (formatters/Statement))])
+  (parameterize ([formatters/Expression (cons format-FunctionExpression (formatters/Expression))]
+                 [formatters/Statement  (cons format-BeginStatement (formatters/Statement))])
     (pretty-format (format-term js))))
 
 ; Custom printers --------------------------------
 
+; FunctionExpression -> doc
+(define format-FunctionExpression
+  (match-lambda
+    [(struct FunctionExpression (_ name args body))
+     (h-append (text "function")
+               (if name
+                   (h-append (text " ")
+                             (format-identifier name))
+                   empty)
+               (text "(")
+               (h-concat (apply-infix (text ", ") (map format-identifier args)))
+               (text ") {")
+               (nest (current-indentation-width)
+                     (format-map format-source-element body formatters/StatementList))
+               line
+               (text "}"))]))
+
 ; BeginStatement -> doc
-(define (format-BeginStatement stmt)
-  (match stmt
+(define format-BeginStatement
+  (match-lambda
     [(struct BeginStatement (_ statements))
      (let ([statements (reverse (collect-begin-substatements statements))])
        (if (null? statements)

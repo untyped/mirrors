@@ -226,44 +226,59 @@
     [(!array expr ...)                 #`(make-ArrayLiteral #f (list #,@(map expand-expression (syntax->list #'(expr ...)))))]
     [(!object field ...)               #`(make-ObjectLiteral #f (list #,@(map expand-field (syntax->list #'(field ...)))))]
     [(!regexp arg ...)                 (expand-regexp-expr #'(!regexp arg ...))]
-    [(!index container index)          #`(make-BracketReference #f
-                                                                #,(expand-expression #'container)
-                                                                #,(expand-expression #'index))]
-    [(!index arg ...)                  (raise-syntax-error #f "bad JS syntax" stx)]
-    [(!dot expr (!index id index))     #`(make-BracketReference #f (make-DotReference #f
-                                                                                      #,(expand-expression #'expr)
-                                                                                      #,(expand-identifier #'id)) 
-                                                                #,(expand-expression #'index))]
-    [(!dot expr (id arg ...))          #`(make-CallExpression #f
-                                                              (make-DotReference #f 
-                                                                                 #,(expand-expression #'expr)
-                                                                                 #,(expand-identifier #'id)) 
-                                                              (list #,@(map expand-expression (syntax->list #'(arg ...)))))]
-    [(!dot expr id)                    #`(make-DotReference #f 
-                                                            #,(expand-expression #'expr)
-                                                            #,(expand-identifier #'id))]
-    [(!dot expr ... (!index id index)) #`(make-BracketReference
-                                          #f (make-DotReference #f
-                                                                #,(expand-expression #'(!dot expr ...))
-                                                                #,(expand-identifier #'id)) 
+    [(!index container index)          #`(make-BracketReference
+                                          #f
+                                          #,(expand-expression #'container)
                                           #,(expand-expression #'index))]
-    [(!dot expr ... (id arg ...))      #`(make-CallExpression #f
-                                                              (make-DotReference #f
-                                                                                 #,(expand-expression #'(!dot expr ...))
-                                                                                 #,(expand-identifier #'id))
-                                                              (list #,@(map expand-expression (syntax->list #'(arg ...)))))]
-    [(!dot expr ... id)                #`(make-DotReference #f
-                                                            #,(expand-expression #'(!dot expr ...))
-                                                            #,(expand-identifier #'id))]
+    [(!index arg ...)                  (raise-syntax-error #f "bad JS syntax" stx)]
+    [(!dot expr (!index id index))     #`(make-BracketReference
+                                          #f
+                                          (make-DotReference
+                                           #f
+                                           #,(expand-expression #'expr)
+                                           #,(expand-identifier #'id)) 
+                                          #,(expand-expression #'index))]
+    [(!dot expr (id arg ...))          #`(make-CallExpression
+                                          #f
+                                          (make-DotReference
+                                           #f 
+                                           #,(expand-expression #'expr)
+                                           #,(expand-identifier #'id)) 
+                                          (list #,@(map expand-expression (syntax->list #'(arg ...)))))]
+    [(!dot expr id)                    #`(make-DotReference
+                                          #f 
+                                          #,(expand-expression #'expr)
+                                          #,(expand-identifier #'id))]
+    [(!dot expr ... (!index id index)) #`(make-BracketReference
+                                          #f
+                                          (make-DotReference
+                                           #f
+                                           #,(expand-expression #'(!dot expr ...))
+                                           #,(expand-identifier #'id)) 
+                                          #,(expand-expression #'index))]
+    [(!dot expr ... (id arg ...))      #`(make-CallExpression
+                                          #f
+                                          (make-DotReference
+                                           #f
+                                           #,(expand-expression #'(!dot expr ...))
+                                           #,(expand-identifier #'id))
+                                          (list #,@(map expand-expression (syntax->list #'(arg ...)))))]
+    [(!dot expr ... id)                #`(make-DotReference
+                                          #f
+                                          #,(expand-expression #'(!dot expr ...))
+                                          #,(expand-identifier #'id))]
     [(!all expr ...)                   #`(js:all #,@(map expand-expression (syntax->list #'(expr ...))))]
     [(? test pos neg)                  #`(make-ConditionalExpression #f #,@(map expand-expression (syntax->list #'(test pos neg))))]
     [(? arg ...)                       (raise-syntax-error #f "bad JS syntax" stx)]
-    [(new class expr ...)              #`(make-NewExpression #f
-                                                             #,(expand-expression #'class)
-                                                             (list #,@(map expand-expression (syntax->list #'(expr ...)))))]
-    [(function (arg ...) stmt ...)     #`(make-FunctionExpression #f #f
-                                                                  (list #,@(map expand-identifier (syntax->list #'(arg ...)))) 
-                                                                  (list #,@(map expand-javascript (syntax->list #'(stmt ...)))))]
+    [(new class expr ...)              #`(make-NewExpression
+                                          #f
+                                          #,(expand-expression #'class)
+                                          (list #,@(map expand-expression (syntax->list #'(expr ...)))))]
+    [(function (arg ...) stmt ...)     #`(make-FunctionExpression
+                                          #f
+                                          #f
+                                          (list #,@(map expand-identifier (syntax->list #'(arg ...)))) 
+                                          (list #,@(map expand-javascript (syntax->list #'(stmt ...)))))]
     [(function arg ...)                (raise-syntax-error #f "bad JS syntax" stx)]
     [(unquote expr)                    #`(quote-expression expr)]
     [(unquote arg ...)                 (raise-syntax-error #f "bad JS syntax" stx)]
