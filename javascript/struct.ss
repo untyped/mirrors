@@ -1,10 +1,11 @@
 #lang scheme/base
 
-(require scheme/contract
-         (only-in (planet dherman/javascript:8/ast)
+(require "../base.ss")
+
+(require (only-in (javascript-in ast)
                   SourceElement?
                   Property?)
-         (except-in (planet dherman/javascript:8/private/syntax/ast-core)
+         (except-in (javascript-in private/syntax/ast-core)
                     make-FunctionExpression
                     FunctionExpression
                     struct:FunctionExpression
@@ -12,7 +13,7 @@
                     FunctionExpression-args
                     FunctionExpression-body
                     FunctionExpression?)
-         (planet dherman/javascript:8/private/syntax/token))
+         (javascript-in private/syntax/token))
 
 ; Structures -------------------------------------
 
@@ -66,8 +67,7 @@
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out (planet dherman/javascript:8/ast)
-                       (planet dherman/javascript:8/private/syntax/ast-core)))
+(provide (javascript-out ast private/syntax/ast-core))
 
 (provide/contract
  [struct (BeginStatement Statement)      ([location   (or/c region? #f)]

@@ -1,10 +1,8 @@
 #lang scheme/base
 
-(require scheme/contract
-         scheme/pretty
-         srfi/26/cut
-         (planet untyped/unlib/profile)
-         "../base.ss"
+(require "../base.ss")
+
+(require (unlib-in profile)
          "render-internal.ss"
          "struct.ss")
 

@@ -1,9 +1,7 @@
 #lang scheme/base
 
-(require scheme/contract
-         scheme/match
-         srfi/19/time
-         srfi/26/cut
+(require srfi/19
+         srfi/26
          (planet untyped/unlib:3/time)
          (planet untyped/unlib:3/symbol)
          "../base.ss"

@@ -1,13 +1,15 @@
 #lang scheme/base
 
-(require (only-in srfi/1/list append-map iota make-list)
-         srfi/26/cut
-         (planet untyped/unlib/syntax)
-         "op.ss"
+(require "../base.ss"
          (for-template scheme/base
-                       scheme/contract
-                       (only-in srfi/1/list drop-right take-right)
-                       (planet untyped/unlib/syntax)
+                       "../base.ss"))
+
+(require (only-in srfi/1 append-map iota make-list)
+         srfi/26
+         (unlib-in syntax)
+         "op.ss"
+         (for-template (only-in srfi/1 drop-right take-right)
+                       (unlib-in syntax)
                        "struct.ss"
                        "quote.ss"))
 

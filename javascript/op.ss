@@ -1,7 +1,8 @@
 #lang scheme/base
 
-(require scheme/contract
-         (only-in (planet dherman/javascript:8/ast)
+(require "../base.ss")
+
+(require (only-in (javascript-in ast)
                   prefix-operators
                   postfix-operators
                   infix-operators

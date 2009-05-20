@@ -12,7 +12,7 @@
 ; This hack allows one version of Mirrors to compile against PLTs before and after
 ; this change.
 
-(define-syntax (ws:response/c stx)
+(define-syntax (web-server-response/c stx)
   (syntax-case stx ()
     [_ (cond [(identifier-binding #'response/c) #'response/c]
              [(identifier-binding #'response?)  #'response?]
@@ -28,7 +28,7 @@
 
 ; Provide statements -----------------------------
 
-(provide ws:response/c)
+(provide web-server-response/c)
 
 (provide/contract
  [no-cache-http-headers (listof header?)])

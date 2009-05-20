@@ -53,11 +53,11 @@
                                   #:seconds   integer?
                                   #:mime-type (or/c bytes? string?)
                                   #:headers   (listof header?))
-                          ws:response/c)]
+                          web-server-response/c)]
  [make-html-response (->* (xml?)
                           (#:code integer? 
                                   #:message   string?
                                   #:seconds   integer?
                                   #:mime-type (or/c bytes? string?)
                                   #:headers   (listof header?))
-                          ws:response/c)])
+                          web-server-response/c)])

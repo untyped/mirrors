@@ -1,13 +1,10 @@
 #lang scheme/base
 
-(require (planet schematics/schemeunit:3/test)
-         (planet schematics/schemeunit:3/text-ui)
-         (planet schematics/schemeunit:3/util)
-         "base.ss")
+(require "base.ss")
+
+(require (schemeunit-in test text-ui util))
 
 ; Provide statements -----------------------------
 
-(provide (all-from-out (planet schematics/schemeunit:3/test)
-                       (planet schematics/schemeunit:3/text-ui)
-                       (planet schematics/schemeunit:3/util)
-                       "base.ss"))
+(provide (schemeunit-out test text-ui util)
+         (all-from-out "base.ss"))

@@ -1,14 +1,10 @@
 #lang scheme/base
 
-(require scheme/contract
-         scheme/match
-         (planet dherman/javascript:8/print)
-         (planet dherman/pprint:4)
-         (only-in (planet schematics/schemeunit:3/util)
-                  require/expose)
-         (planet untyped/unlib/debug)
-         (planet untyped/unlib/list)
-         (planet untyped/unlib/profile)
+(require "../base.ss")
+
+(require (javascript-in print)
+         (pprint-in)
+         (unlib-in debug list profile)
          "quote.ss"
          "render-fast.ss"
          "struct.ss")

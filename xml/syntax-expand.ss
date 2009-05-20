@@ -1,11 +1,9 @@
 #lang scheme/base
 
-(require scheme/match
-         (only-in srfi/1/list append-map)
-         srfi/26/cut
-         (planet untyped/unlib/log)
-         (planet untyped/unlib/syntax)
-         "../base.ss"
+(require "../base.ss")
+
+(require (only-in srfi/1 append-map)
+         (unlib-in log syntax)
          "expander.ss"
          "render-internal.ss"
          "syntax-internal.ss"

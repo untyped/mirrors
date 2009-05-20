@@ -84,7 +84,7 @@
                #:seconds   natural?
                #:mime-type bytes?
                #:headers   (listof header?))
-       ws:response/c)]
+       web-server-response/c)]
  [make-plain-response/incremental
   (->* (procedure?)
        (#:code natural?
@@ -92,10 +92,10 @@
                #:seconds   natural?
                #:mime-type bytes?
                #:headers   (listof header?))
-       ws:response/c)]
+       web-server-response/c)]
  [make-redirect-response  
   (->* ((or/c string? url?))
        (#:code natural? 
                #:message string?
                #:headers (listof header?))
-       ws:response/c)])
+       web-server-response/c)])

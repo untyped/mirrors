@@ -1,10 +1,10 @@
 #lang scheme/base
 
 (require (for-syntax scheme/base
-                     scheme/match
-                     scheme/pretty
-                     srfi/26/cut
-                     (planet untyped/unlib:3/syntax)
+                     "../base.ss")
+         "../base.ss")
+
+(require (for-syntax (unlib-in syntax)
                      "../persistent-struct-info.ss"
                      "sql-syntax-util.ss")
          (prefix-in sql: "sql-lang.ss")
