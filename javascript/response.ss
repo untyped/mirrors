@@ -36,4 +36,4 @@
                                  #:seconds   integer?
                                  #:mime-type (or/c string? bytes?)
                                  #:headers   (listof header?))
-                         web-server-response/c)])
+                         response/full?)])

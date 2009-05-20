@@ -15,17 +15,6 @@
 ;
 ; These macros allow Mirrors to compile and run with PLT versions prior to and after this change:
 
-; _
-(define-syntax (web-server-response/c stx)
-  (syntax-case stx ()
-    [(_ arg ...)
-     (cond [(identifier-binding #'response?)  #'(response? arg ...)]
-           [(identifier-binding #'response/c) #'(response/c arg ...)]
-           [else (error "response? and response/c not found")])]
-    [_ (cond [(identifier-binding #'response?)  #'response?]
-             [(identifier-binding #'response/c) #'response/c]
-             [else (error "response? and response/c not found")])]))
-
 ; (_ expr)
 (define-syntax (string+bytes->message stx)
   (syntax-case stx ()
@@ -69,8 +58,7 @@
 
 ; Provide statements -----------------------------
 
-(provide web-server-response/c
-         string+bytes->message
+(provide string+bytes->message
          string+bytes->mime-type
          string+bytes->content)
 
