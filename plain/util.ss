@@ -4,18 +4,59 @@
 
 (require (for-syntax scheme/base)
          scheme/contract
-         web-server/servlet)
+         web-server/servlet
+         (unlib-in string bytes))
 
 ; Syntax -----------------------------------------
 
-; In or around PLT 4.1.4.3, the response? procedure was replaced with response/c.
-; This hack allows one version of Mirrors to compile against PLTs before and after
-; this change.
+; In or around PLT 4.1.4.3, two changes were made to the web server:
+;   - the response? procedure was replaced with a contract, response/c;
+;   - the message argument to make-response/foo became a bytes rather than a string.
+;
+; These macros allow Mirrors to compile and run with PLT versions prior to and after this change:
 
+; _
 (define-syntax (web-server-response/c stx)
   (syntax-case stx ()
-    [_ (cond [(identifier-binding #'response/c) #'response/c]
-             [(identifier-binding #'response?)  #'response?]
+    [(_ arg ...)
+     (cond [(identifier-binding #'response?)  #'(response? arg ...)]
+           [(identifier-binding #'response/c) #'(response/c arg ...)]
+           [else (error "response? and response/c not found")])]
+    [_ (cond [(identifier-binding #'response?)  #'response?]
+             [(identifier-binding #'response/c) #'response/c]
+             [else (error "response? and response/c not found")])]))
+
+; (_ expr)
+(define-syntax (string+bytes->message stx)
+  (syntax-case stx ()
+    [(_ arg ...)
+     (cond [(identifier-binding #'response?)  #'(ensure-string arg ...)]
+           [(identifier-binding #'response/c) #'(ensure-bytes arg ...)]
+           [else (error "response? and response/c not found")])]
+    [_ (cond [(identifier-binding #'response?)  #'ensure-string]
+             [(identifier-binding #'response/c) #'ensure-bytes]
+             [else (error "response? and response/c not found")])]))
+
+; (_ expr)
+(define-syntax (string+bytes->mime-type stx)
+  (syntax-case stx ()
+    [(_ arg ...)
+     (cond [(identifier-binding #'response?)  #'(ensure-bytes arg ...)]
+           [(identifier-binding #'response/c) #'(ensure-bytes arg ...)]
+           [else (error "response? and response/c not found")])]
+    [_ (cond [(identifier-binding #'response?)  #'ensure-bytes]
+             [(identifier-binding #'response/c) #'ensure-bytes]
+             [else (error "response? and response/c not found")])]))
+
+; (_ expr)
+(define-syntax (string+bytes->content stx)
+  (syntax-case stx ()
+    [(_ arg ...)
+     (cond [(identifier-binding #'response?)  #'(ensure-string arg ...)]
+           [(identifier-binding #'response/c) #'(ensure-bytes arg ...)]
+           [else (error "response? and response/c not found")])]
+    [_ (cond [(identifier-binding #'response?)  #'ensure-string]
+             [(identifier-binding #'response/c) #'ensure-bytes]
              [else (error "response? and response/c not found")])]))
 
 ; Procedures -------------------------------------
@@ -28,7 +69,10 @@
 
 ; Provide statements -----------------------------
 
-(provide web-server-response/c)
+(provide web-server-response/c
+         string+bytes->message
+         string+bytes->mime-type
+         string+bytes->content)
 
 (provide/contract
  [no-cache-http-headers (listof header?)])

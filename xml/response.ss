@@ -1,63 +1,64 @@
 #lang scheme/base
 
-(require scheme/contract
-         web-server/servlet
+(require "../base.ss")
+
+(require web-server/servlet
          "../plain/util.ss"
          "render.ss"
          "struct.ss")
 
 ;  [#:code      integer]
-;  [#:message   string]
+;  [#:message   (U string bytes)]
 ;  [#:seconds   integer]
-;  [#:mime-type (U bytes string)]
+;  [#:mime-type (U string bytes)]
 ;  [#:headers   (listof header)]
 ;  xml
 ; ->
 ;  response
 (define (make-xml-response
          #:code      [code      200]
-         #:message   [message   "OK"]
+         #:message   [message   #"OK"]
          #:seconds   [seconds   (current-seconds)]
          #:mime-type [mime-type #"text/xml; charset=utf-8"]
          #:headers   [headers   no-cache-http-headers]
          content)
-  (let ([mime-type (if (bytes? mime-type)
-                       mime-type
-                       (string->bytes/utf-8 mime-type))])
-    (make-response/full code message seconds mime-type headers (list (xml->string content)))))
+  (let ([message   (string+bytes->message   message)]
+        [mime-type (string+bytes->mime-type mime-type)])
+    (make-response/full code message seconds mime-type headers
+                        (list (string+bytes->content (xml->string content))))))
 
 ;  [#:code      integer]
-;  [#:message   string]
+;  [#:message   (U string bytes)]
 ;  [#:seconds   integer]
-;  [#:mime-type (U bytes string)]
+;  [#:mime-type (U string bytes)]
 ;  [#:headers   (listof header)]
 ;  xml
 ; ->
 ;  response
 (define (make-html-response
          #:code      [code      200]
-         #:message   [message   "OK"]
+         #:message   [message   #"OK"]
          #:seconds   [seconds   (current-seconds)]
          #:mime-type [mime-type #"text/html; charset=utf-8"]
          #:headers   [headers   no-cache-http-headers]
          content)
-  (let ([mime-type (if (bytes? mime-type)
-                       mime-type
-                       (string->bytes/utf-8 mime-type))])
-    (make-response/full code message seconds mime-type headers (list (xml->string content)))))
+  (let ([message   (string+bytes->message   message)]
+        [mime-type (string+bytes->mime-type mime-type)])
+    (make-response/full code message seconds mime-type headers
+                        (list (string+bytes->content (xml->string content))))))
 
 (provide/contract
  [make-xml-response  (->* (xml?)
                           (#:code integer? 
-                                  #:message   string?
+                                  #:message   (or/c string? bytes?)
                                   #:seconds   integer?
-                                  #:mime-type (or/c bytes? string?)
+                                  #:mime-type (or/c string? bytes?)
                                   #:headers   (listof header?))
                           web-server-response/c)]
  [make-html-response (->* (xml?)
                           (#:code integer? 
-                                  #:message   string?
+                                  #:message   (or/c string? bytes?)
                                   #:seconds   integer?
-                                  #:mime-type (or/c bytes? string?)
+                                  #:mime-type (or/c string? bytes?)
                                   #:headers   (listof header?))
                           web-server-response/c)])

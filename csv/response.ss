@@ -1,38 +1,39 @@
 #lang scheme/base
 
-(require scheme/contract
-         web-server/servlet
+(require "../base.ss")
+
+(require web-server/servlet
          "../plain/util.ss"
          "render.ss"
          "struct.ss")
 
-;;  [#:code      integer]
-;;  [#:message   string]
-;;  [#:seconds   integer]
-;;  [#:mime-type (U bytes string)]
-;;  [#:headers   (listof header)]
-;;  csv
-;; ->
-;;  response
+;  [#:code      integer]
+;  [#:message   (U string bytes)]
+;  [#:seconds   integer]
+;  [#:mime-type (U string bytes)]
+;  [#:headers   (listof header)]
+;  csv
+; ->
+;  response
 (define (make-csv-response
          #:code      [code      200]
-         #:message   [message   "OK"]
+         #:message   [message   #"OK"]
          #:seconds   [seconds   (current-seconds)]
          #:mime-type [mime-type #"text/csv; charset=utf-8"]
          #:headers   [headers   no-cache-http-headers]
          content)
-  (let ([mime-type (if (bytes? mime-type)
-                       mime-type
-                       (string->bytes/utf-8 mime-type))])
-    (make-response/full code message seconds mime-type headers (list (csv->string content)))))
+  (let ([message   (string+bytes->message   message)]
+        [mime-type (string+bytes->mime-type mime-type)])
+    (make-response/full code message seconds mime-type headers
+                        (list (string+bytes->content (csv->string content))))))
 
 ; Provide statements -----------------------------
 
 (provide/contract
  [make-csv-response (->* (csv?)
-                          (#:code integer? 
-                                  #:message   string?
-                                  #:seconds   integer?
-                                  #:mime-type (or/c bytes? string?)
-                                  #:headers   (listof header?))
-                          web-server-response/c)])
+                         (#:code integer? 
+                                 #:message   (or/c string? bytes?)
+                                 #:seconds   integer?
+                                 #:mime-type (or/c string? bytes?)
+                                 #:headers   (listof header?))
+                         web-server-response/c)])

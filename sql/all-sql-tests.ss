@@ -1,7 +1,8 @@
 #lang scheme/base
 
-(require "../test-base.ss"
-         "sql-alias-test.ss"
+(require "../test-base.ss")
+
+(require "sql-alias-test.ss"
          "sql-lang-test.ss"
          "sql-syntax-test.ss"
          "sql-util-test.ss")
