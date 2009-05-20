@@ -7,17 +7,17 @@
 
 ; Structure types --------------------------------
 
-(define-struct type                            ()           #:prefab)
-(define-struct (boolean-type   type)           ()           #:prefab)
-(define-struct (numeric-type   type)           ()           #:prefab)
-(define-struct (integer-type   numeric-type)   ()           #:prefab)
-(define-struct (real-type      numeric-type)   ()           #:prefab)
-(define-struct (character-type type)           (max-length) #:prefab)
-(define-struct (symbol-type    character-type) ()           #:prefab)
-(define-struct (string-type    character-type) ()           #:prefab)
-(define-struct (temporal-type  type)           ()           #:prefab)
-(define-struct (time-utc-type  temporal-type)  ()           #:prefab)
-(define-struct (time-tai-type  temporal-type)  ()           #:prefab)
+(define-struct type                            ()             #:prefab)
+(define-struct (boolean-type   type)           ()             #:prefab)
+(define-struct (numeric-type   type)           ()             #:prefab)
+(define-struct (integer-type   numeric-type)   ()             #:prefab)
+(define-struct (real-type      numeric-type)   ()             #:prefab)
+(define-struct (character-type type)           (max-length)   #:prefab)
+(define-struct (symbol-type    character-type) ()             #:prefab)
+(define-struct (string-type    character-type) ()             #:prefab)
+(define-struct (temporal-type  type)           ()             #:prefab)
+(define-struct (time-utc-type  temporal-type)  ()             #:prefab)
+(define-struct (time-tai-type  temporal-type)  ()             #:prefab)
 
 ; Procedures -------------------------------------
 

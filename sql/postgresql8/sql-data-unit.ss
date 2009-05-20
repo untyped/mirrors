@@ -17,15 +17,15 @@
 (define (escape-value type value)
   (cond [(boolean-type? type)  (guard value boolean? "boolean")          (if value "true" "false")]
         [(not value)           "NULL"]
-        [(guid-type? type)     (guard value guid? "(U guid #f)")         (let ([entity (guid-entity value)]
-                                                                               [id     (guid-id value)])
-                                                                                 (cond [(not (eq? entity (send type get-entity)))
-                                                                                        (raise-exn exn:fail:contract 
-                                                                                          (format "wrong entity: expected ~a, received ~a."
-                                                                                                  (guid-entity value)
-                                                                                                  (guid-type-entity type)))]
-                                                                                       [(not id) "NULL" #;(error (format "attempt save guid with #f id: ~s" value))]
-                                                                                       [else     (number->string id)]))]
+        [(guid-type? type)     (guard value guid? "(U guid #f)")         (let ([entity (guid-entity value)])
+                                                                           (if (eq? entity (send type get-entity))
+                                                                               (number->string
+                                                                                (or (guid-id value)
+                                                                                    (raise-type-error 'escape-guid-value "vanilla guid" value)))
+                                                                               (raise-exn exn:fail:contract 
+                                                                                 (format "wrong entity: expected ~a, received ~a."
+                                                                                         (guid-entity value)
+                                                                                         (guid-type-entity type)))))]
         [(integer-type? type)  (guard value integer? "(U integer #f)")   (number->string value)]
         [(real-type? type)     (guard value real? "(U real #f)")         (number->string value)]
         [(string-type? type)   (guard value string? "(U string #f)")     (string-append "'" (regexp-replace* #rx"'" value "''") "'")]

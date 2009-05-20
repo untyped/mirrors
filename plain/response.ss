@@ -1,9 +1,10 @@
 #lang scheme/base
 
-(require web-server/servlet
-         (planet untyped/unlib/bytes)
-         (planet untyped/unlib/number)
-         "../base.ss"
+(require "../base.ss")
+
+(require (for-syntax scheme/base)
+         web-server/servlet
+         (unlib-in bytes number)
          "util.ss")
 
 ; Procedures -------------------------------------
@@ -57,12 +58,21 @@
   (make-plain-response
    #:code     code
    #:message  message
-   #:headers  (cons (make-header #"Location" (string->bytes/utf-8 (if (string? url) url (url->string url))))
+   #:headers  (cons (make-header #"Location" (url+string->bytes url))
                     (filter (lambda (header)
                               (and (not (equal? (header-field header) #"Location"))
                                    (not (equal? (header-field header) #"location"))))
                             headers))
    (list "Redirecting you - please wait...")))
+
+; Helpers ----------------------------------------
+
+; (U url string) -> bytes
+(define (url+string->bytes url)
+  (string->bytes/utf-8
+   (if (string? url)
+       url
+       (url->string url))))
 
 ; Provide statements -----------------------------
 
@@ -74,7 +84,7 @@
                #:seconds   natural?
                #:mime-type bytes?
                #:headers   (listof header?))
-       response?)]
+       ws:response/c)]
  [make-plain-response/incremental
   (->* (procedure?)
        (#:code natural?
@@ -82,10 +92,10 @@
                #:seconds   natural?
                #:mime-type bytes?
                #:headers   (listof header?))
-       response?)]
+       ws:response/c)]
  [make-redirect-response  
   (->* ((or/c string? url?))
        (#:code natural? 
                #:message string?
                #:headers (listof header?))
-       response?)])
+       ws:response/c)])

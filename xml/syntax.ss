@@ -1,33 +1,45 @@
 #lang scheme/base
 
+(require "../base.ss")
+
 (require (for-syntax scheme/base
                      scheme/pretty
+                     "../base.ss"
                      "syntax-expand.ss"
                      "syntax-prerender.ss")
-         "../base.ss"
          "struct.ss"
          "render-internal.ss")
 
+; Lowercase variants -----------------------------
+
 (define-syntax (xml stx)
   (syntax-case stx ()
-    [(_ arg ...) #`(xml-quote #,(prerender-block #'(arg ...)))]))
+    [(_ arg ...)
+     #`(xml-quote #,(parameterize ([quote-case-restriction 'lower])
+                      (prerender-block #'(arg ...))))]))
 
 (define-syntax (xml-attrs stx)
   (syntax-case stx ()
-    [(_ [name val] ...) #`(begin #,(expand-attributes #'([name val] ...)))]))
+    [(_ [name val] ...)
+     #`(begin #,(parameterize ([quote-case-restriction 'lower])
+                  (expand-attributes #'([name val] ...))))]))
 
 (define-syntax (xml* stx)
   (syntax-case stx ()
-    [(_ arg ...) #`(xml-quote #,(expand-block #'(arg ...)))]))
+    [(_ arg ...)
+     #`(xml-quote #,(parameterize ([quote-case-restriction 'lower])
+                      (expand-block #'(arg ...))))]))
 
 (define-syntax (xml-attrs* stx)
   (syntax-case stx ()
-    [(_ [name val] ...) #`(begin #,(expand-attributes #'([name val] ...)))]))
+    [(_ [name val] ...)
+     #`(begin #,(parameterize ([quote-case-restriction 'lower])
+                  (expand-attributes #'([name val] ...))))]))
 
 ; (_ boolean xml)
 (define-syntax (opt-xml stx)
   (syntax-case stx ()
-    [(opt-xml test expr ...)
+    [(_ test expr ...)
      #'(if test
            (xml expr ...)
            (xml))]))
@@ -37,22 +49,64 @@
 ; (_ expr id expr)
 (define-syntax (opt-xml-attr stx)
   (syntax-case stx ()
-    [(opt-xml-attr id)
-     #'(opt-xml-attr id id id)]
-    [(opt-xml-attr test id)
-     #'(opt-xml-attr test id id)]
-    [(opt-xml-attr test id val)
+    [(_ id)      #'(opt-xml-attr id id id)]
+    [(_ test id) #'(opt-xml-attr test id id)]
+    [(_ test id val)
      (begin (unless (identifier? #'id)
               (raise-syntax-error 'mirrors/xml "invalid XML attribute name" stx #'id))
             #'(if test
                   (xml-attrs [id ,val])
                   (xml-attrs)))]))
 
+; Uppercase variants -----------------------------
+
+(define-syntax (XML stx)
+  (syntax-case stx ()
+    [(_ arg ...)
+     #`(xml-quote #,(parameterize ([quote-case-restriction 'upper])
+                      (prerender-block #'(arg ...))))]))
+
+(define-syntax (XML-ATTRS stx)
+  (syntax-case stx ()
+    [(_ [name val] ...)
+     #`(begin #,(parameterize ([quote-case-restriction 'upper])
+                  (expand-attributes #'([name val] ...))))]))
+
+(define-syntax (XML* stx)
+  (syntax-case stx ()
+    [(_ arg ...)
+     #`(xml-quote #,(parameterize ([quote-case-restriction 'upper])
+                      (expand-block #'(arg ...))))]))
+
+(define-syntax (XML-ATTRS* stx)
+  (syntax-case stx ()
+    [(_ [name val] ...)
+     #`(begin #,(parameterize ([quote-case-restriction 'upper])
+                  (expand-attributes #'([name val] ...))))]))
+
+; (_ boolean xml)
+(define-syntax (OPT-XML stx)
+  (syntax-case stx ()
+    [(_ test expr ...)
+     #'(if test
+           (XML expr ...)
+           (XML))]))
+
+; (_ id)
+; (_ expr id)
+; (_ expr id expr)
+(define-syntax (OPT-XML-ATTR stx)
+  (syntax-case stx ()
+    [(_ id)          #'(OPT-XML-ATTR id id id)]
+    [(_ test id)     #'(OPT-XML-ATTR test id id)]
+    [(_ test id val)
+     (begin (unless (identifier? #'id)
+              (raise-syntax-error 'mirrors/xml "invalid XML attribute name" stx #'id))
+            #'(if test
+                  (XML-ATTRS [id ,val])
+                  (XML-ATTRS)))]))
+
 ; Provide statements -----------------------------
 
-(provide xml
-         xml-attrs
-         xml*
-         xml-attrs*
-         opt-xml
-         opt-xml-attr)
+(provide xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr
+         XML XML-ATTRS XML* XML-ATTRS* OPT-XML OPT-XML-ATTR)

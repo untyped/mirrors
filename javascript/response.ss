@@ -35,4 +35,4 @@
                                  #:seconds   integer?
                                  #:mime-type (or/c bytes? string?)
                                  #:headers   (listof header?))
-                         response?)])
+                         ws:response/c)])

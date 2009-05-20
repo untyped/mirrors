@@ -1,6 +1,8 @@
 #lang scheme/base
 
-(require "../test-base.ss"
+(require "../test-base.ss")
+
+(require srfi/19
          "struct.ss"
          "syntax.ss"
          "syntax-expand.ss")

@@ -55,7 +55,6 @@
                (values (add-table-column! table-id 'column-id column-type column-arg ...)
                        ...)))
            
-           
            (define-values (hygienic-constraint-id ...)
              (let ([table-id  hygienic-table-id]
                    [column-id hygienic-column-id]

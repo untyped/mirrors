@@ -184,7 +184,7 @@
 ; Expressions ------------------------------------
 
 ; column-alias -> aggregate
-(define (sql:count arg)
+(define-function (sql:count arg)
   (let ([arg (sql-lift arg)])
     (make-aggregate type:integer 'count (list arg))))
 

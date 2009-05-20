@@ -30,7 +30,7 @@
                                           [(js expr)     (expand-declaration #'expr)]
                                           [(js expr ...) (expand-declaration #'(!begin expr ...))]))]
     [(var init ...)                   #`(make-VariableDeclaration #f (list #,@(map expand-initializer (syntax->list #'(init ...)))))]
-    [(function id (arg ...) stmt ...) (identifier? #'id)
+    [(function id (arg ...) stmt ...) (javascript-identifier-guard #'id)
                                       #`(make-FunctionDeclaration 
                                          #f
                                          #,(expand-identifier #'id) 
@@ -47,10 +47,10 @@
 ; syntax -> syntax
 (define (expand-initializer stx)
   (syntax-case* stx (unquote) symbolic-identifier=?
-    [id                      (identifier? #'id)
+    [id                      (javascript-identifier-guard #'id)
                              #`(make-VariableInitializer #f #,(expand-identifier #'id) #f)]
     [(unquote id)            #`(make-VariableInitializer #f id #f)]
-    [(id expr)               (identifier? #'id)
+    [(id expr)               (javascript-identifier-guard #'id)
                              #`(make-VariableInitializer #f #,(expand-identifier #'id) #,(expand-expression #'expr))]
     [((unquote id) expr)     #`(make-VariableInitializer #f id #,(expand-expression #'expr))]
     [any                     (raise-syntax-error #f "bad JS syntax" (syntax->datum stx))]))
@@ -165,15 +165,14 @@
 ; TODO : Complete
 (define (expand-for-in-item stx)
   (syntax-case* stx (var) symbolic-identifier=?
-    [(var id1 id2) (and (identifier? #'id1) (identifier? #'id2))
+    [(var id1 id2) (and (javascript-identifier-guard #'id1) (javascript-identifier-guard #'id2))
                    (expand-declaration #'(var id1 id2))]
-    [(var id)      (identifier? #'id)
+    [(var id)      (javascript-identifier-guard #'id)
                    (expand-declaration #'(var id))]
-    [(var any ...) (identifier? #'id)
-                   (raise-syntax-error #f "bad JS for-in declaration: initial values not allowed" stx)]
-    [(id1 id2)     (and (identifier? #'id1) (identifier? #'id2))
+    [(var any ...) (raise-syntax-error #f "bad JS for-in declaration: initial values not allowed" stx)]
+    [(id1 id2)     (and (javascript-identifier-guard #'id1) (javascript-identifier-guard #'id2))
                    (expand-expression #'(!all id1 id2))]
-    [id            (identifier? #'id)
+    [id            (javascript-identifier-guard #'id)
                    (expand-expression #'(!all id))]
     [any           (raise-syntax-error #f "bad JS for-in declaration" stx)]))
 
@@ -304,13 +303,11 @@
     [((function body ...) arg ...) #`(js:call (make-ParenExpression #f #,(expand-expression #'(function body ...))) #,@(map expand-expression (syntax->list #'(arg ...))))]
     [(quote arg)                   (expand-literal+identifier #'(quote arg))]
     [(quote arg ...)               (raise-syntax-error #f "bad JS syntax: one argument only" stx)]
-    [(fn arg ...)                  (begin
-                                     (prevent-quoting-errors #'fn #'(fn arg ...))
-                                     #`(make-CallExpression #f
-                                                            (parenthesize-anonymous-function #,(expand-expression #'fn))
-                                                            (list #,@(map expand-expression (syntax->list #'(arg ...))))))]
+    [(fn arg ...)                  #`(make-CallExpression #f
+                                                          (parenthesize-anonymous-function #,(expand-expression #'fn))
+                                                          (list #,@(map expand-expression (syntax->list #'(arg ...)))))]
     ; Literals and identifiers:
-    [lit+id                        (or (identifier? #'lit+id)
+    [lit+id                        (or (javascript-identifier-guard #'lit+id)
                                        (quotable-literal? #'lit+id))
                                    (expand-literal+identifier #'lit+id)]
     [_                             (raise-syntax-error #f "bad JS syntax" stx)]))
@@ -318,7 +315,7 @@
 ; syntax -> syntax
 (define (expand-field stx)
   (syntax-case stx ()
-    [(name expr) (identifier? #'name) 
+    [(name expr) (javascript-identifier-guard #'name) 
                  #`(cons (make-Identifier #f 'name)    #,(expand-expression #'expr))]
     [(name expr) (string? (syntax->datum #'name))
                  #`(cons (make-StringLiteral #f name)  #,(expand-expression #'expr))]
@@ -330,7 +327,7 @@
   (syntax-case* stx (quote unquote) symbolic-identifier=?
     [(quote lit)   #'(quote-expression (quote lit))]
     [(unquote lit) #'lit]
-    [id            (identifier? #'id)
+    [id            (javascript-identifier-guard #'id)
                    #`(make-VarReference #f #,(expand-identifier #'id))]
     [lit           (quotable-literal? #'lit)
                    #'(quote-expression lit)]))
@@ -338,7 +335,7 @@
 ; syntax -> syntax
 (define (expand-identifier stx)
   (syntax-case stx (unquote)
-    [id           (identifier? #'id)
+    [id           (javascript-identifier-guard #'id)
                   (if (or (javascript-identifier? #'id)
                           (memq (syntax->datum #'id) '(this null)))
                       #'(js:id (quote id))
@@ -432,13 +429,18 @@
      (begin (set! value-stx (parse-value-expr #'value))
             (parse-keywords #'(key ...)))]))
 
-; syntax syntax -> void
-(define (prevent-quoting-errors fn-stx expr-stx)
-  (when (prevent-quoting-errors?)
-    (cond [(memq (syntax->datum fn-stx) '(xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr))
-           (raise-syntax-error #f "bad JS syntax: XML block found in JS output" expr-stx)]
-          [(memq (syntax->datum fn-stx) '(js opt-js))
-           (raise-syntax-error #f "bad JS syntax: JS block found in JS output" expr-stx)])))
+; syntax -> boolean
+(define (javascript-identifier-guard stx)
+  (cond [(memq (syntax->datum stx)
+               (if (eq? (quote-case-restriction) 'lower)
+                   lowercase-quote-symbols
+                   uppercase-quote-symbols))
+         (raise-syntax-error 'mirrors/javascript 
+                             (if (eq? (quote-case-restriction) 'lower)
+                                 "cannot use this identifier here (possible double quoting error): switch the surrounding quote macro to \"JS\" or another uppercase equivalent"
+                                 "cannot use this identifier here (possible double quoting error): switch the surrounding quote macro to \"js\" or another lowercase equivalent")
+                             #'name)]
+        [else (identifier? stx)]))
 
 ; Provide statements -----------------------------
 

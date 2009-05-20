@@ -1,7 +1,24 @@
 #lang scheme/base
 
-(require scheme/contract
+(require "../base.ss")
+
+(require (for-syntax scheme/base)
+         scheme/contract
          web-server/servlet)
+
+; Syntax -----------------------------------------
+
+; In or around PLT 4.1.4.3, the response? procedure was replaced with response/c.
+; This hack allows one version of Mirrors to compile against PLTs before and after
+; this change.
+
+(define-syntax (ws:response/c stx)
+  (syntax-case stx ()
+    [_ (cond [(identifier-binding #'response/c) #'response/c]
+             [(identifier-binding #'response?)  #'response?]
+             [else (error "response? and response/c not found")])]))
+
+; Procedures -------------------------------------
 
 ; (listof header)
 (define no-cache-http-headers
@@ -10,6 +27,8 @@
         (make-header #"Expires"       #"Mon, 26 Jul 1997 05:00:00 GMT")))
 
 ; Provide statements -----------------------------
+
+(provide ws:response/c)
 
 (provide/contract
  [no-cache-http-headers (listof header?)])

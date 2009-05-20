@@ -79,7 +79,7 @@
 (define (construct-expression-alias name expr)
   (make-expression-alias (expression-type expr) name expr))
 
-; literal-value -> literal
+; sql-quotable -> literal
 (define construct-literal
   (let ([type:boolean  (make-boolean-type)]
         [type:integer  (make-integer-type)]
@@ -108,21 +108,16 @@
   (or (relation? item) (select? item)))
 
 ; any -> boolean
-(define (literal-value? item)
-  (or (boolean? item)
-      (integer? item)
-      (real? item)
-      (string? item)
-      (symbol? item)
-      (time-tai? item)
-      (time-utc? item)))
-
-; any -> boolean
-(define (quotable? item)
-  (or (expression? item)
-      (literal-value? item)
-      (select? item)
-      (select-alias? item)))
+(define (boolean-expression?   expr) (and (expression? expr) (boolean-type?   (expression-type expr))))
+(define (integer-expression?   expr) (and (expression? expr) (integer-type?   (expression-type expr))))
+(define (real-expression?      expr) (and (expression? expr) (real-type?      (expression-type expr))))
+(define (numeric-expression?   expr) (and (expression? expr) (numeric-type?   (expression-type expr))))
+(define (string-expression?    expr) (and (expression? expr) (string-type?    (expression-type expr))))
+(define (symbol-expression?    expr) (and (expression? expr) (symbol-type?    (expression-type expr))))
+(define (character-expression? expr) (and (expression? expr) (character-type? (expression-type expr))))
+(define (time-utc-expression?  expr) (and (expression? expr) (time-utc-type?  (expression-type expr))))
+(define (time-tai-expression?  expr) (and (expression? expr) (time-tai-type?  (expression-type expr))))
+(define (temporal-expression?  expr) (and (expression? expr) (temporal-type?  (expression-type expr))))
 
 ; Accessors and mutators -------------------------
 
@@ -165,13 +160,29 @@
 ;  (U expression source select boolean integer real string symbol time-tai time-utc)
 ; ->
 ;  (U expression source)
-(define (sql-lift arg)
-  (cond [(expression? arg)    arg]
-        [(relation? arg)      arg]
-        [(literal-value? arg) (construct-literal arg)]
-        [(select? arg)        (make-select-alias (gensym/interned 'subq) arg)]
-        [else                 (raise-exn exn:fail:contract
-                                (format "could not lift: ~s" arg))]))
+(define (sql-quote arg)
+  (cond [(expression?   arg) arg]
+        [(relation?     arg) arg]
+        [(sql-quotable? arg) (construct-literal arg)]
+        [(select?       arg) (make-select-alias (gensym/interned 'subq) arg)]
+        [else                (raise-type-error 'sql-quote "argument cannot be quoted" arg)]))
+
+; any -> boolean
+(define (sql-quotable? item)
+  (or (boolean?  item)
+      (integer?  item)
+      (real?     item)
+      (string?   item)
+      (symbol?   item)
+      (time-tai? item)
+      (time-utc? item)))
+
+; any -> boolean
+(define (sql+quotable? item)
+  (or (expression?   item)
+      (sql-quotable? item)
+      (select?       item)
+      (select-alias? item)))
 
 ; Provide statements -----------------------------
 
@@ -195,14 +206,25 @@
  [add-table-check-constraint!                              (-> table? symbol? expression? check-constraint?)]
  [rename construct-column-alias      make-column-alias     (-> table-alias? column? column-alias?)]
  [rename construct-expression-alias  make-expression-alias (-> symbol? expression? expression-alias?)]
- [rename construct-literal           make-literal          (-> quotable? literal?)]
+ [rename construct-literal           make-literal          (-> sql+quotable? literal?)]
  [rename construct-null-literal      make-null-literal     (-> type? literal?)]
- [quotable?                                                (-> any/c boolean?)]
  [relation+select?                                         (-> (or/c relation? select?) boolean?)]
+ [sql-quotable?                                            (-> any/c boolean?)]
+ [sql+quotable?                                            (-> any/c boolean?)]
+ [boolean-expression?                                      (-> any/c boolean?)]
+ [integer-expression?                                      (-> any/c boolean?)]
+ [real-expression?                                         (-> any/c boolean?)]
+ [string-expression?                                       (-> any/c boolean?)]
+ [symbol-expression?                                       (-> any/c boolean?)]
+ [time-utc-expression?                                     (-> any/c boolean?)]
+ [time-tai-expression?                                     (-> any/c boolean?)]
+ [numeric-expression?                                      (-> any/c boolean?)]
+ [character-expression?                                    (-> any/c boolean?)]
+ [temporal-expression?                                     (-> any/c boolean?)]
  [relation-name                                            (-> relation? symbol?)]
- [relation-attribute                                       (-> relation? symbol? (or/c attribute? false/c))]
+ [relation-attribute                                       (-> relation? symbol? (or/c attribute? #f))]
  [relation-attributes                                      (-> relation? (listof attribute?))]
- [table-column                                             (-> table? symbol? (or/c column? false/c))]
- [table-constraint                                         (-> table? symbol? (or/c constraint? false/c))]
- [sql-lift                                                 (-> (or/c expression? relation? select? literal-value?)
+ [table-column                                             (-> table? symbol? (or/c column? #f))]
+ [table-constraint                                         (-> table? symbol? (or/c constraint? #f))]
+ [sql-quote                                                (-> (or/c expression? relation? select? sql-quotable?)
                                                                (or/c expression? relation?))])

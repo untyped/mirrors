@@ -23,37 +23,6 @@
 (define type:time-tai (make-time-tai-type))
 
 ; Expressions ------------------------------------
-#|
-; column-alias -> aggregate
-(define (sql:count arg)
-  (let ([arg (sql-lift arg)])
-    (make-aggregate type:integer 'count (list arg))))
-
-; [relation] -> aggregate
-(define sql:count*
-  (case-lambda
-    [()      (make-aggregate type:integer 'count* null)]
-    [(alias) (make-aggregate type:integer 'count* (list alias))]))
-
-; expression+quotable -> aggregate
-(define (sql:min arg)     
-  (let ([arg (sql-lift arg)])
-    (make-aggregate (expression-type arg) 'min (list arg))))
-
-; expression+quotable -> aggregate
-(define (sql:max arg)     
-  (let ([arg (sql-lift arg)])
-    (make-aggregate (expression-type arg) 'max (list arg))))
-
-; expression+quotable -> aggregate
-(define sql:average
-  (let ([type type:real])
-    (lambda (alias)     
-      (let ([arg (sql-lift alias)])
-        (if (numeric-expression? arg)
-            (make-aggregate type 'average (list arg))
-            (raise-type-error 'average (list arg)))))))
-|#
 
 ; expression+quotable ... -> function
 (define-function (sql:and . args)

@@ -2,6 +2,8 @@
 
 (require "../base.ss")
 
+(require srfi/19)
+
 ; quotable-value [boolean] -> string
 (define (quotable-value->string val [pretty? #t])
   (cond [(string? val)     val]

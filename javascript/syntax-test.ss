@@ -1,32 +1,30 @@
 #lang scheme/base
 
 (require (for-syntax scheme/base
+                     "../test-base.ss"
                      "syntax-internal.ss")
          (prefix-in scheme: scheme/pretty)
          "../test-base.ss"
          "expander.ss"
          "render.ss"
          "struct.ss"
-         "syntax.ss"
-         "util.ss")
+         "syntax.ss")
 
 ; Helpers ----------------------------------------
 
 (define-syntax (test-js stx)
-  (syntax-case stx ()
-    [(_ message actual expected . flags)
-     (with-handlers ([exn? (lambda (exn)
-                             #`(test-case message
-                                 (fail #,(format "Could not compile javascript: ~a"
-                                                 (exn-message exn)))))])
-       (with-syntax ([js->string
-                      (if (equal? (map syntax->datum (syntax->list #'flags)) '(#:pretty))
-                          #'javascript->pretty-string
-                          #'javascript->string)])
+  (parameterize ([quote-case-restriction 'lower])
+    (syntax-case stx ()
+      [(_ message actual expected)
+       (with-handlers ([exn? (lambda (exn)
+                               #`(test-case message
+                                   (fail #,(format "Could not compile javascript: ~a"
+                                                   (exn-message exn)))))])
          (with-syntax ([expanded (expand-javascript #'actual)])
            #`(test-case message
                (with-check-info (['compiled expanded])
-                 (check-equal? (js->string expanded) expected))))))]))
+                 (check-equal? (javascript->string expanded)
+                               expected)))))])))
 
 (define-javascript-syntax (!var-debug [id expr] ...)
   (js (!begin (var [id expr])
@@ -68,7 +66,7 @@
       "function(a, b, c) { return a + b + c; }")
     
     (test-js "decl: anonymous function as an expression argument"
-      (+ (,(js (function (a b c) (return (+ a b c))))) 1)
+      (+ ((function (a b c) (return (+ a b c)))) 1)
       "(function(a, b, c) { return a + b + c; })() + 1;")
     
     (test-js "decl: var"
@@ -79,34 +77,13 @@
       (var [,(make-Identifier #f 'x) 1] [y ,(+ 2 3)])
       "var x = 1, y = 5;")
     
+    (test-js "stmt: empty begin" (!begin) "")
+    
     (test-js "stmt: begin"
       (!begin (+ 1 2 3)
               (!begin (var [x (+ 2 3 4)]))
               (+ 3 4 5))
       "1 + 2 + 3; var x = 2 + 3 + 4; 3 + 4 + 5;")
-    
-    (test-js "stmt: empty begin"
-      (!begin)
-      ""
-      #:pretty)
-    
-    (test-js "stmt: nested empty begins"
-      (!begin (!begin (!begin))
-              (alert (+ 1 2 3))
-              (!begin (!begin))
-              (alert (+ 2 3 4))
-              (!begin (!begin)))
-      "alert(1 + 2 + 3);\nalert(2 + 3 + 4);"
-      #:pretty)
-    
-    (test-js "stmt: nested non-empty begins"
-      (!begin (!begin (!begin))
-              (alert (+ 1 2 3))
-              (!begin (!begin))
-              (!begin (!begin (alert (+ 2 3 4))))
-              (!begin (!begin)))
-      "alert(1 + 2 + 3);\nalert(2 + 3 + 4);"
-      #:pretty)
     
     (test-js "stmt: empty block" (!block) "{}")
     
@@ -242,16 +219,6 @@
     (test-js "expr: !regexp: global and case insensitive"
       (!regexp "abc" #:global? #t #:ci? #t)
       "/abc/gi;")
-    
-    (test-js "expr: function indentation"
-      (+ 1 2 3 ((function () 
-                 (return (+ 4 5 6)))))
-      #<<ENDSTR
-1 + 2 + 3 + (function() {
-    return 4 + 5 + 6;
-})();
-ENDSTR
-      #:pretty)
     
     (test-js "really long one-line program"
       (function () 

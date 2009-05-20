@@ -122,93 +122,6 @@
   (when having
     (check-expression 'having-clause having relations columns)))
 
-; Expression predicates --------------------------
-
-; type ... -> (any -> boolean)
-(define (make-expression-predicate . types)
-  (match-lambda
-    [(struct expression (type))
-     (ormap (cut type-compatible? type <>) types)]
-    [_ #f]))
-
-; any -> boolean
-(define boolean-expression?
-  (make-expression-predicate (make-boolean-type)))
-
-; any -> boolean
-(define integer-expression?
-  (make-expression-predicate (make-integer-type)))
-
-; any -> boolean
-(define real-expression?
-  (make-expression-predicate (make-real-type)))
-
-; any -> boolean
-(define numeric-expression?
-  (make-expression-predicate (make-integer-type)
-                             (make-real-type )))
-
-; any -> boolean
-(define string-expression?
-  (make-expression-predicate (make-string-type #f)))
-
-; any -> boolean
-(define symbol-expression?
-  (make-expression-predicate (make-symbol-type #f)))
-
-; any -> boolean
-(define character-expression?
-  (make-expression-predicate (make-string-type #f)
-                             (make-symbol-type #f)))
-
-; any -> boolean
-(define time-utc-expression?
-  (make-expression-predicate (make-time-utc-type)))
-
-; any -> boolean
-(define time-tai-expression?
-  (make-expression-predicate (make-time-tai-type)))
-
-; any -> boolean
-(define temporal-expression?
-  (make-expression-predicate (make-time-utc-type)
-                             (make-time-tai-type)))
-
-; define-function syntax -------------------------
-
-(define-syntax (define-function stx)
-  (define (remove-prefix sym)
-    (let ([match (regexp-match #rx"^sql:(.*)$" (symbol->string sym))])
-      (if match
-          (string->symbol (cadr match))
-          (error "define-function: identifier must have an 'sql:' prefix: " sym))))
-  (syntax-case stx (else)
-    [(_ (id arg ...) [rule type] ...)
-     (identifier? #'id)
-     (with-syntax ([plain-id           (remove-prefix (syntax->datum #'id))]
-                   [(arg-contract ...) (map (lambda _ #'quotable?) (syntax->list #'(arg ...)))])
-       #'(begin (define (id arg ...)
-                  (let ([arg (sql-lift arg)] ...)
-                    (make-function (cond [rule type] ...
-                                         [else (error "~a not defined for the types: "
-                                                      'id
-                                                      (map expression-type (list arg ...)))])
-                                   'plain-id
-                                   (list arg ...))))
-                (provide/contract [rename id plain-id (-> arg-contract ... function?)])))]
-    [(_ (id . args) [rule type] ...)
-     (identifier? #'id)
-     (with-syntax ([plain-id (remove-prefix (syntax->datum #'id))])
-       #'(begin (define (id . args)
-                  (let ([args (map sql-lift args)])
-                    (make-function (cond [rule type] ...
-                                         [else (error (format "~a not defined for the types: "
-                                                              'id
-                                                              (map expression-type args)))])
-                                   'plain-id
-                                   args)))
-                (provide/contract [rename id plain-id (->* () () #:rest (listof quotable?) function?)])))]))
-
 ; Helpers ----------------------------------------
 
 ; (U x (listof x)) -> (listof x)
@@ -316,16 +229,6 @@
          check-order-clause
          check-having-clause
          check-no-aggregates
-         boolean-expression?
-         integer-expression?
-         real-expression?
-         string-expression?
-         symbol-expression?
-         time-utc-expression?
-         time-tai-expression?
-         numeric-expression?
-         character-expression?
-         temporal-expression?
          define-function)
 
 (provide/contract

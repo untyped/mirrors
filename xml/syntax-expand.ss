@@ -29,12 +29,10 @@
     (syntax-case* stx (unquote unquote-splicing) symbolic-identifier=?
       [((unquote expr) other ...)          (cons #'(unquote expr) (loop #'(other ...)))]
       [((unquote-splicing expr) other ...) (cons #'(unquote-splicing expr) (loop #'(other ...)))]
-      [([name (unquote value)] other ...)  (if (xml-identifier? #'name)
-                                               (cons #'(unquote (make-attribute 'name value)) (loop #'(other ...)))
-                                               (raise-syntax-error 'mirrors/xml "invalid XML attribute name" #'name))]
-      [([name value] other ...)            (if (xml-identifier? #'name)
-                                               (cons #`(unquote (make-attribute 'name #,(expand-literal #'value))) (loop #'(other ...)))
-                                               (raise-syntax-error 'mirrors/xml "invalid XML attribute name" #'name))]
+      [([name (unquote value)] other ...)  (xml-identifier-guard #'name stx)
+                                           (cons #'(unquote (make-attribute 'name value)) (loop #'(other ...)))]
+      [([name value] other ...)            (xml-identifier-guard #'name stx)
+                                           (cons #`(unquote (make-attribute 'name #,(expand-literal #'value))) (loop #'(other ...)))]
       [()                                  null]))
   ;; syntax
   #`(quasiquote (#,@(loop stx))))
@@ -94,12 +92,10 @@
     [(!pi expr ...)                     (expand-pi #'(expr ...))]
     [(& expr)                           (expand-entity #'expr)]
     [(& expr ...)                       (raise-syntax-error 'mirrors/xml "bad XML syntax: one argument only" stx)]
-    [(tag (@ [name val] ...) child ...) (if (xml-identifier? #'tag)
-                                            #`(make-element 'tag #,(expand-attributes #'([name val] ...)) #,(expand-block #'(child ...)))
-                                            (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
-    [(tag child ...)                    (if (xml-identifier? #'tag)
-                                            #`(make-element 'tag null #,(expand-block #'(child ...)))
-                                            (raise-syntax-error 'mirrors/xml "invalid XML tag name" stx #'tag))]
+    [(tag (@ [name val] ...) child ...) (xml-identifier-guard #'tag stx)
+                                        #`(make-element 'tag #,(expand-attributes #'([name val] ...)) #,(expand-block #'(child ...)))]
+    [(tag child ...)                    (xml-identifier-guard #'tag stx)
+                                        #`(make-element 'tag null #,(expand-block #'(child ...)))]
     [([_ ...] ...)                      (raise-syntax-error 'mirrors/xml "bad XML syntax" stx)]
     [expr                               (expand-literal #'expr)]))
 

@@ -24,7 +24,7 @@
   (test-suite "sql-data-unit.ss"
     
     (test-case "escape-value : guid"
-      (let ([t (make-foreign-key-type #t entity:person)])
+      (let ([t (make-guid-type #t entity:person)])
         (check-equal? (escape-value t #f) "NULL")
         (check-equal? (escape-value t (make-guid entity:person 123)) "123")
         (check-exn exn:fail:contract? (cut escape-value t (make-guid 'course 123)))))
