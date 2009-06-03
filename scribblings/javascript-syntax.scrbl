@@ -46,6 +46,7 @@ Mirrors provides a set of macros for rendering blocks of Javascript, intended to
                      (unquote expr)
                      [id (unquote expr)]]
    [js-expr          (custom-syntax-id js-expr ...)
+                     (js-operator js-expr ...)
                      (!array js-expr ...)
                      (!object [property js-expr] ...)
                      (!index js-expr js-expr)
@@ -62,6 +63,7 @@ Mirrors provides a set of macros for rendering blocks of Javascript, intended to
                      number-literal
                      string-literal
                      (quote symbol-literal)]
+   [js-operator      (code:line ...) (code:comment "symbolic Javascript operator: =, +, etc")]
    [custom-syntax-id id]
    [regexp-key       (code:line #:global? boolean-literal)
                      (code:line #:global? (unquote boolean-expr))
