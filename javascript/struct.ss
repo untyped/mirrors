@@ -41,6 +41,9 @@
 ; (struct (U region #f) (U Identifier #f) (listof Identifier) (listof SourceElement))
 (define-struct (FunctionExpression MirrorsExpression) (name args body) #:prefab)
 
+; (struct (U region #f) string)
+(define-struct (RawExpression MirrorsExpression) (text) #:prefab)
+
 ; Procedures -------------------------------------
 
 ; statement -> void
@@ -70,12 +73,14 @@
 (provide (javascript-out ast private/syntax/ast-core))
 
 (provide/contract
- [struct (BeginStatement Statement)      ([location   (or/c region? #f)]
-                                          [statements (listof SourceElement?)])]
- [struct (FunctionExpression Expression) ([location   (or/c region? #f)]
-                                          [name       (or/c Identifier? #f)]
-                                          [args       (listof Identifier?)]
-                                          [body       (listof SourceElement?)])]
+ [struct (BeginStatement Statement)        ([location   (or/c region? #f)]
+                                            [statements (listof SourceElement?)])]
+ [struct (FunctionExpression Expression)   ([location   (or/c region? #f)]
+                                            [name       (or/c Identifier? #f)]
+                                            [args       (listof Identifier?)]
+                                            [body       (listof SourceElement?)])]
+ [struct (RawExpression MirrorsExpression) ([location   (or/c region? #f)]
+                                            [text       string?])]
  [empty-begin?            procedure?]
  [javascript?             procedure?]
  [javascript-declaration? procedure?]

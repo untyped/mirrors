@@ -68,6 +68,7 @@
       [(struct DotReference (_ container id))          (display-js container)
                                                        (display-str ".")
                                                        (display-js id)]
+      [(struct RawExpression (_ str))                  (display str out)]
       [(struct NewExpression (_ id args))              (display-str "new ")
                                                        (display-js id)
                                                        (display-str "(")

@@ -19,14 +19,20 @@
 
 ; javascript -> string
 (define (javascript->string js)
-  (parameterize ([formatters/Expression (cons format-FunctionExpression (formatters/Expression))]
-                 [formatters/Statement  (cons format-BeginStatement (formatters/Statement))])
+  (parameterize ([formatters/Expression (list* format-FunctionExpression
+                                               format-RawExpression
+                                               (formatters/Expression))]
+                 [formatters/Statement  (list* format-BeginStatement
+                                               (formatters/Statement))])
     (pretty-format (group (format-term js)) #f)))
 
 ; javascript -> string
 (define (javascript->pretty-string js)
-  (parameterize ([formatters/Expression (cons format-FunctionExpression (formatters/Expression))]
-                 [formatters/Statement  (cons format-BeginStatement (formatters/Statement))])
+  (parameterize ([formatters/Expression (list* format-FunctionExpression
+                                               format-RawExpression
+                                               (formatters/Expression))]
+                 [formatters/Statement  (list* format-BeginStatement
+                                               (formatters/Statement))])
     (pretty-format (format-term js))))
 
 ; Custom printers --------------------------------
@@ -60,6 +66,12 @@
                                    (h-append line (format-substatement statement)))
                                  (cdr statements)
                                  formatters/StatementList))))]))
+
+; RawStatement -> doc
+(define format-RawExpression
+  (match-lambda
+    [(struct RawExpression (_ str))
+     (text str)]))
 
 ; (listof statement) [(listof doc)] -> (listof statement)
 (define (collect-begin-substatements statements [accum null])

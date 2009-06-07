@@ -7,7 +7,11 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "removed extraneous newlines generated when pretty printing empty begin statements."))))
+    (ul (li "added " (tt "!raw") " expressions and statements to the Javascript language;")
+        (li "added uppercase versions of XML and JS quote equivalents (" (tt "xml") ", " (tt "opt-xml") ", " (tt "js") " and so on);")
+        (li "using a lowercase quote form within a lowercase quoted block now results in a compile error;")
+        (li "using an uppercase quote form within an uppercase quoted block now results in a compile error;")
+        (li "removed extraneous newlines generated when pretty printing empty begin statements."))))
 
 (define primary-file
   "mirrors.ss")

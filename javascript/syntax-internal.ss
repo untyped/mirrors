@@ -55,7 +55,7 @@
 
 ; syntax [boolean] -> syntax
 (define (expand-statement stx [quote-expression? #t])
-  (syntax-case* stx (function !begin !block if do while for for-in break continue return with switch !label throw try unquote unquote-splicing) symbolic-identifier=?
+  (syntax-case* stx (function !begin !block !raw if do while for for-in break continue return with switch !label throw try unquote unquote-splicing) symbolic-identifier=?
     [(expander arg ...)                 (javascript-expander-syntax? #'expander)
                                         (let ([expanded-stx (javascript-expand #'(expander arg ...))])
                                           (syntax-case* expanded-stx (js) symbolic-identifier=?
@@ -65,6 +65,15 @@
     [(!block stmt ...)                  #`(make-BlockStatement
                                            #f
                                            (list #,@(map expand-javascript (syntax->list #'(stmt ...)))))]
+    [(!raw expr)                       #`(make-ExpressionStatement
+                                          #f
+                                          (make-RawExpression
+                                           #f
+                                           #,(syntax-case* #'expr (quote unquote) symbolic-identifier=?
+                                               [(unquote val) #'val]
+                                               [(quote val)   #'(quote val)]
+                                               [val           (quotable-literal? #'val)
+                                                              #'val])))]
     [(if expr pos)                      #`(make-IfStatement
                                            #f
                                            #,(expand-expression #'expr)
@@ -214,7 +223,7 @@
     (symbol-append 'js: (syntax->datum op-stx)))
   
   ; syntax-case/ops injects rules for prefix, infox, postfix and assignment operators:
-  (syntax-case* stx (!array !object !regexp !index !dot !all ? new function quote unquote unquote-splicing) symbolic-identifier=?
+  (syntax-case* stx (!array !object !regexp !index !dot !all ? !raw new function quote unquote unquote-splicing) symbolic-identifier=?
     [(expander arg ...)                (javascript-expander-syntax? #'expander)
                                        (let ([expanded-stx (javascript-expand #'(expander arg ...))])
                                          (syntax-case* expanded-stx (js) symbolic-identifier=?
@@ -267,6 +276,15 @@
     [(!all expr ...)                   #`(js:all #,@(map expand-expression (syntax->list #'(expr ...))))]
     [(? test pos neg)                  #`(make-ConditionalExpression #f #,@(map expand-expression (syntax->list #'(test pos neg))))]
     [(? arg ...)                       (raise-syntax-error #f "bad JS syntax" stx)]
+    [(!raw expr)                       #`(make-ParenExpression
+                                          #f
+                                          (make-RawExpression
+                                           #f
+                                           #,(syntax-case* #'expr (quote unquote) symbolic-identifier=?
+                                               [(unquote val) #'val]
+                                               [(quote val)   #'(quote val)]
+                                               [val           (quotable-literal? #'val)
+                                                              #'val])))]
     [(new class expr ...)              #`(make-NewExpression
                                           #f
                                           #,(expand-expression #'class)

@@ -93,6 +93,14 @@
               (+ 3 4 5))
       "{ 1 + 2 + 3; { var x = 2 + 3 + 4; } 3 + 4 + 5; }")
     
+    (test-js "stmt: raw (statement position)"
+      (!block (!raw "["))
+      "{ [; }")
+    
+    (test-js "stmt: raw (expression position)"
+      (+ 1 (!raw "[") 2)
+      "1 + ([) + 2;")
+    
     (test-js "stmt: if version 1"
       (if x (return y))
       "if (x) return y; ")
