@@ -58,8 +58,6 @@ Syntactic shorthand for:
 @defform[(OPT-JS boolean-expr js-stmt ...)]{
 Like @scheme[opt-js], but follows the same double-quoting rules as @scheme[JS].}
 
------------------------------------
-
 @section[#:tag "js-stmt"]{Javascript syntax}
 
 The forms above use the same parenthetical Javascript syntax:
