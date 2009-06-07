@@ -13,8 +13,7 @@
         (li "using an uppercase quote form within an uppercase quoted block now results in a compile error;")
         (li "removed extraneous newlines generated when pretty printing empty begin statements."))))
 
-(define primary-file
-  "mirrors.ss")
+(define primary-file "mirrors.ss")
 
 (define url "http://svn.untyped.com/mirrors/")
 
