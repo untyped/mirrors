@@ -4,20 +4,74 @@
 
 @(define-eval js-eval (for-syntax scheme/base) (planet untyped/mirrors/javascript/javascript))
 
-@title[#:tag "javascript-syntax"]{Javascript syntax}
+@title[#:tag "javascript-syntax"]{Constructing Javascript fragments}
 
 @defmodule[(planet untyped/mirrors/javascript/syntax)]
 
-Mirrors provides a set of macros for rendering blocks of Javascript, intended to replace Jay McCarthy's @tt{javascript.plt} (which is no longer in development). Very little checking is performed to make sure the Javascript code makes sense.
+@section{Javascript macros}
 
-@defform/subs[
+Mirrors provides the following macros for creating blocks of Javascript:
+
+@defform[(js js-stmt ...)]{
+Builds a block of Javascript. See @secref["js-stmt"] for the syntax of @scheme[js-stmt].
+
+@examples[
+  #:eval js-eval
+  (let ([message "Hello world"])
+    (pretty-print (js (alert ,message))))]
+
+To prevent double-quoting errors, it is a syntax error to use the following Mirrors quote forms within a @scheme[js] block: @scheme[xml], @scheme[xml*], @scheme[xml-attrs], @scheme[xml-attrs*], @scheme[opt-xml], @scheme[opt-xml-attr], @scheme[js], @scheme[opt-js]:
+
+@interaction[
+  #:eval js-eval
+  (js (js))]
+
+You can get around this restriction using the uppercase form, @scheme[JS], described below.}
+
+@defform[(JS js-stmt ...)]{
+Like @scheme[js], but permits the use of the lowercase Mirrors quote forms as @scheme[js-stmt]@schemeidfont{s}:
+
+@interaction[
+  #:eval js-eval
+  (code:line (pretty-print (JS (js))) (code:comment "'js()' function call"))]
+
+It is a syntax error to use the following identifiers in expression position within a @scheme[JS] block: @scheme[XML], @scheme[XML*], @scheme[XML-ATTRS], @scheme[XML-ATTRS*], @scheme[OPT-XML], @scheme[OPT-XML-ATTR], @scheme[JS], @scheme[OPT-JS]:
+
+@interaction[
+  #:eval js-eval
+  (JS (JS))]}
+
+@defform[(opt-js boolean-expr js-stmt ...)]{
+
+Syntactic shorthand for:
+
+@schemeblock[
+  (if boolean-expr
+      (js js-stmt ...)
+      (js))]
+
+@examples[
+  #:eval js-eval
+  (javascript->string (opt-js #t (alert "This statement will be printed....")))
+  (javascript->string (opt-js #f (alert "...but this statement won't.")))]}
+
+@defform[(OPT-JS boolean-expr js-stmt ...)]{
+Like @scheme[opt-js], but follows the same double-quoting rules as @scheme[JS].}
+
+-----------------------------------
+
+@section[#:tag "js-stmt"]{Javascript syntax}
+
+The forms above use the same parenthetical Javascript syntax:
+
+@schemegrammar*[
   #:literals (function !begin !block if do while for for-in break continue return with switch !label throw try unquote unquote-splicing 
                !array !object !index !dot !all ? new function null this id _)
-  (js js-stmt ...)
-  ([js-stmt          js-decl
+  [js-stmt          js-decl
                      (custom-syntax-id js-stmt ...)
                      (!begin js-stmt ...)
                      (!block js-stmt ...)
+                     (!raw string-expr)
                      (!regexp str regexp-key ...)
                      (if js-expr js-stmt js-stmt)
                      (do js-stmt ... js-expr)
@@ -51,6 +105,7 @@ Mirrors provides a set of macros for rendering blocks of Javascript, intended to
                      (!object [property js-expr] ...)
                      (!index js-expr js-expr)
                      (!dot js-expr dot-expr ...)
+                     (!raw string-expr)
                      (!all js-expr ...)
                      (? js-expr js-expr js-expr)
                      (new js-expr js-expr ...)
@@ -63,22 +118,34 @@ Mirrors provides a set of macros for rendering blocks of Javascript, intended to
                      number-literal
                      string-literal
                      (quote symbol-literal)]
-   [js-operator      (code:line ...) (code:comment "symbolic Javascript operator: =, +, etc")]
-   [custom-syntax-id id]
+   [js-operator      (code:line ... (code:comment "Javascript operator: =, +, etc"))]
+   [custom-syntax-id (code:line id (code:comment "bound by define-js-syntax"))]
    [regexp-key       (code:line #:global? boolean-literal)
                      (code:line #:global? (unquote boolean-expr))
                      (code:line #:ci? boolean-literal)
                      (code:line #:ci? (unquote boolean-expr))]
-   [dot-expr         (code:line id    (code:comment "property-style accessor : a.b"))
-                     (code:line (!index id expr) (code:comment "array-index-style accessor: a.b[1]"))
-                     (code:line (id js-expr ...) (code:comment "method-style accessor: a.b(1, 2)"))]
+   [dot-expr         (code:line id    (code:comment "property-style: a.b"))
+                     (code:line (!index id expr) (code:comment "array-style: a.b[1]"))
+                     (code:line (id js-expr ...) (code:comment "method-style: a.b(1, 2)"))]
    [opt-decl         _
                      var-decl]
    [opt-expr         _
-                     expr])]{
-Builds a Javascript declaration, statement or expression. Unquote can be used to insert Scheme expressions resulting in Boolean, numeric, string, symbol, bytes or URL values.
+                     expr]]
+                     
+@scheme[!raw] forms are treated as statements or expressions depending on their context. Semicolons and parentheses are added automatically depending on the interpretation of the block:
 
-@scheme[custom-syntax-id] indicates an identifier bound with @scheme[define-javascript-syntax].}
+@examples[
+  #:eval js-eval
+  (code:comment "raw statements are followed by semicolons:")
+  (display (javascript->pretty-string
+            (js (alert "First statement")
+            (!raw "alert(\"Second sta tement\")")
+            (alert "Third statement"))))
+  (code:comment "raw expressions are surrounded by parentheses:")
+  (display (javascript->pretty-string
+            (js (alert (+ 1 (!raw "2") 3)))))]
+
+@section{Custom Javascript syntax}
 
 @defform*[[(define-javascript-syntax (id arg ...) js-expr)
            (define-javascript-syntax id js-transformer)
@@ -107,24 +174,6 @@ The second and third forms behave like @scheme[define-match-expander]. @scheme[j
         [(_ a b) #'(if (< a b) a b)])))
   (javascript->string (js (!min 1 2)))
   (!min 1 2)]}
-
-@defform[(opt-js boolean-expr js-stmt ...)]{
-
-Syntactic shorthand for:
-
-@schemeblock[
-  (if boolean-expr
-      (js js-stmt ...)
-      (js))]
-
-Only works at the statement level.
-
-@examples[
-  #:eval js-eval
-  (javascript->string
-   (opt-js #t (alert "This alert will be shown....")))
-  (javascript->string
-   (opt-js #f (alert "...but this alert won't.")))]}
 
 @defproc[(javascript? [val any]) boolean?]{
 Returns @scheme[#t] if @scheme[val] is a Javascript declaration, statement or expression.}

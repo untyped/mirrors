@@ -5,13 +5,11 @@
 
 @(define-eval xml-eval (for-syntax scheme/base) (planet untyped/mirrors/xml/xml))
 
-@title[#:tag "xml-syntax"]{XML syntax}
+@title[#:tag "xml-syntax"]{Constructing XML fragments}
 
 @defmodule[(planet untyped/mirrors/xml/syntax)]
 
-@section{XML macros}
-
-Mirrors provides the following macros for building XML:
+Mirrors provides the following macros for creating blocks of XML:
 
 @defform[(xml xml-expr ...)]{
 Builds a block of XML, optimising any immutable blocks of markup into @scheme[!raw] blocks to reduce memory consumption and rendering time. See @secref["xml-expr"] for the syntax of @scheme[xml-expr].
@@ -25,22 +23,22 @@ To prevent double-quoting errors, it is a syntax error to use the following Mirr
 
 @interaction[
   #:eval xml-eval
-  (xml (xml "this is bad"))]
+  (xml (xml))]
 
 You can get around this restriction using the uppercase form, @scheme[XML], described below.}
 
 @defform[(XML xml-expr ...)]{
-Like @scheme[xml], but permits the use of the lowercase Mirrors quote forms within the @scheme[xml-expr]@schemeidfont{s}:
+Like @scheme[xml], but permits the use of the lowercase Mirrors quote forms as @scheme[xml-expr]@schemeidfont{s}:
 
 @interaction[
   #:eval xml-eval
-  (XML (xml "this is okay"))]
+  (code:line (XML (xml)) (code:comment "'<xml/>' tag"))]
 
 It is a syntax error to use the following identifiers in expression position within an @scheme[XML] block: @scheme[XML], @scheme[XML*], @scheme[XML-ATTRS], @scheme[XML-ATTRS*], @scheme[OPT-XML], @scheme[OPT-XML-ATTR], @scheme[JS], @scheme[OPT-JS]:
 
 @interaction[
   #:eval xml-eval
-  (XML (XML "this is bad"))]}
+  (XML (XML))]}
 
 @defform[(xml* xml-expr ...)]{
 Like @scheme[xml], but skips the optimisation of static markup, leaving the element structure intact for later traversal and manipulation:
@@ -119,7 +117,7 @@ Like @scheme[opt-xml-attr], but follows the same double-quoting rules as @scheme
 
 @section[#:tag "xml-expr"]{XML expression syntax}
 
-The above forms the same XML syntax, inspired by the syntax of Neil van Dyke's @italic{HtmlPrag} package:
+The forms above use the same XML syntax, inspired by the syntax of Neil van Dyke's @italic{HtmlPrag} package:
 
 @schemegrammar*[
    #:literals (\@ & U !comment !cdata !pi !raw id xml attribute quotable-value symbol integer)
