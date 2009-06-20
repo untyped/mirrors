@@ -11,35 +11,38 @@
 
 ; Parameters -------------------------------------
 
-; (parameter boolean)
-(define render-pretty-javascript?
-  (make-parameter #t))
+; (parameter (U 'pretty 'packed 'fast))
+(define javascript-rendering-mode
+  (make-parameter 'pretty))
 
 ; Public procedures ------------------------------
 
 ; javascript -> string
 (define (javascript->string js)
-  #;(parameterize ([allow-nested-function-declarations? #t]
-                   [formatters/Expression               (list* format-FunctionExpression
-                                                               format-RawExpression
-                                                               (formatters/Expression))]
-                   [formatters/Statement                (list* format-BeginStatement
-                                                               (formatters/Statement))])
-      (pretty-format (group (format-term js)) #f))
-  (if (render-pretty-javascript?)
-      (javascript->pretty-string js)
-      (fast-javascript->string js)))
+  (case (javascript-rendering-mode)
+    [(pretty) (parameterize ([formatters/Expression (list* format-FunctionExpression
+                                                           format-RawExpression
+                                                           (formatters/Expression))]
+                             [formatters/Statement  (list* format-BeginStatement
+                                                           (formatters/Statement))])
+                (pretty-format (format-term js)))]
+    [(packed) (parameterize ([formatters/Expression (list* format-FunctionExpression
+                                                           format-RawExpression
+                                                           (formatters/Expression))]
+                             [formatters/Statement  (list* format-BeginStatement
+                                                           (formatters/Statement))])
+                (pretty-format (group (format-term js)) #f))]
+    [(fast)   (fast-javascript->string js)]))
 
+; javascript -> string
+(define (javascript->packed-string js)
+  (parameterize ([javascript-rendering-mode 'packed])
+    (javascript->string js)))
 
 ; javascript -> string
 (define (javascript->pretty-string js)
-  (parameterize ([allow-nested-function-declarations? #t]
-                 [formatters/Expression               (list* format-FunctionExpression
-                                                             format-RawExpression
-                                                             (formatters/Expression))]
-                 [formatters/Statement                (list* format-BeginStatement
-                                                             (formatters/Statement))])
-    (pretty-format (format-term js))))
+  (parameterize ([javascript-rendering-mode 'pretty])
+    (javascript->string js)))
 
 ; Custom printers --------------------------------
 
@@ -67,11 +70,21 @@
      (let ([statements (reverse (collect-begin-substatements statements))])
        (if (null? statements)
            (h-append)
-           (h-append (format-substatement (car statements))
+           (h-append (format-begin-substatement (car statements))
                      (format-map (lambda (statement)
-                                   (h-append line (format-substatement statement)))
+                                   (h-append line (format-begin-substatement statement)))
                                  (cdr statements)
                                  formatters/StatementList))))]))
+
+; (U Declaration Statement) -> doc
+; Named function declarations aren't allowed inside regular statements in some
+; JS VMs, so by default JS.plt disallows this arrangement using the contract on
+; format-substatement. This is obviously no good for BeginStatements: the function
+; below provides a workaround.
+(define (format-begin-substatement stmt+decl)
+  (if (Declaration? stmt+decl)
+      (format-declaration stmt+decl)
+      (format-statement stmt+decl)))
 
 ; RawStatement -> doc
 (define format-RawExpression
@@ -92,6 +105,7 @@
 ; Provide statements -----------------------------
 
 (provide/contract
- [render-pretty-javascript? (parameter/c boolean?)]
+ [javascript-rendering-mode (parameter/c (or/c 'pretty 'packed 'fast))]
  [javascript->string        (-> javascript? string?)]
+ [javascript->packed-string (-> javascript? string?)]
  [javascript->pretty-string (-> javascript? string?)])

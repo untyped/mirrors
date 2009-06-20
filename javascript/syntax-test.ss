@@ -45,6 +45,8 @@
 (define syntax-tests
   (test-suite "syntax.ss"
     
+    #:before (cut javascript-rendering-mode 'packed)
+    
     (test-js "expander: decl"
       (!var-debug [a 1] [b 2])
       "var a = 1; console.log(\"a\" + a); var b = 2; console.log(\"b\" + b);")
@@ -76,7 +78,7 @@
     (test-js "decl: var unquote"
       (var [,(make-Identifier #f 'x) 1] [y ,(+ 2 3)])
       "var x = 1, y = 5;")
-    
+        
     (test-js "stmt: empty begin" (!begin) "")
     
     (test-js "stmt: begin"
@@ -85,6 +87,12 @@
               (+ 3 4 5))
       "1 + 2 + 3; var x = 2 + 3 + 4; 3 + 4 + 5;")
     
+    (test-js "stmt: begin containing nested function declarations"
+      (!begin (function a () (return))
+              (function b () (return)))
+      "function a() { return; } function b() { return; }")
+
+
     (test-js "stmt: empty block" (!block) "{}")
     
     (test-js "stmt: block"

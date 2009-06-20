@@ -36,7 +36,7 @@
                                                          (display-js expr))]
       [(struct FunctionDeclaration (_ id args body))   (display-str "function ")
                                                        (display-js id)
-                                                       (display-str " (")
+                                                       (display-str "(")
                                                        (display-list ", " args)
                                                        (display-str ") { ")
                                                        (for-each display-js body)

@@ -7,7 +7,9 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "named function declarations are now allowed within !begin blocks;"))))
+    (ul (li "replaced the " (tt "render-pretty-javascript?") " parameter with " (tt "javascript-rendering-mode") ";")
+        (li "added " (tt "javascript->packed-string") ";")
+        (li "fixed bug that disallowed named function declarations within " (tt "!begin") " blocks."))))
 
 (define primary-file "mirrors.ss")
 
