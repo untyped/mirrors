@@ -21,7 +21,7 @@
       (js)))
 
 ; (_ string xml ...)
-(define-syntax-rule (js-debug msg expr ...)
+(define-syntax-rule (debug-js msg expr ...)
   (let ([ans (js expr ...)])
     (printf "----------~a:~n~a~n----------~n" msg (javascript->pretty-string ans))
     ans))
@@ -41,12 +41,12 @@
       (JS)))
 
 ; (_ string xml ...)
-(define-syntax-rule (JS-DEBUG msg expr ...)
+(define-syntax-rule (DEBUG-JS msg expr ...)
   (let ([ans (JS expr ...)])
     (printf "----------~a:~n~a~n----------~n" msg (javascript->pretty-string ans))
     ans))
 
 ; Provide statements -----------------------------
 
-(provide js opt-js js-debug
-         JS OPT-JS JS-DEBUG)
+(provide js opt-js debug-js
+         JS OPT-JS DEBUG-JS)

@@ -58,6 +58,12 @@
                   (xml-attrs [id ,val])
                   (xml-attrs)))]))
 
+; (_ string xml ...)
+(define-syntax-rule (debug-xml msg expr ...)
+  (let ([ans (xml expr ...)])
+    (printf "----------~a:~n~a~n----------~n" msg (xml->string ans))
+    ans))
+
 ; Uppercase variants -----------------------------
 
 (define-syntax (XML stx)
@@ -106,7 +112,13 @@
                   (XML-ATTRS [id ,val])
                   (XML-ATTRS)))]))
 
+; (_ string xml ...)
+(define-syntax-rule (DEBUG-XML msg expr ...)
+  (let ([ans (XML expr ...)])
+    (printf "----------~a:~n~a~n----------~n" msg (xml->string ans))
+    ans))
+
 ; Provide statements -----------------------------
 
-(provide xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr
-         XML XML-ATTRS XML* XML-ATTRS* OPT-XML OPT-XML-ATTR)
+(provide xml xml-attrs xml* xml-attrs* opt-xml opt-xml-attr debug-xml
+         XML XML-ATTRS XML* XML-ATTRS* OPT-XML OPT-XML-ATTR DEBUG-XML)

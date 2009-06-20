@@ -7,7 +7,7 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "nothing yet...")))
+    (ul (li "named function declarations are now allowed within !begin blocks;"))))
 
 (define primary-file "mirrors.ss")
 

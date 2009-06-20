@@ -2,7 +2,7 @@
 
 (require "../base.ss")
 
-(require (javascript-in print)
+(require (javascript-in config print)
          (pprint-in)
          (unlib-in debug list profile)
          "quote.ss"
@@ -19,20 +19,26 @@
 
 ; javascript -> string
 (define (javascript->string js)
-  (parameterize ([formatters/Expression (list* format-FunctionExpression
-                                               format-RawExpression
-                                               (formatters/Expression))]
-                 [formatters/Statement  (list* format-BeginStatement
-                                               (formatters/Statement))])
-    (pretty-format (group (format-term js)) #f)))
+  #;(parameterize ([allow-nested-function-declarations? #t]
+                   [formatters/Expression               (list* format-FunctionExpression
+                                                               format-RawExpression
+                                                               (formatters/Expression))]
+                   [formatters/Statement                (list* format-BeginStatement
+                                                               (formatters/Statement))])
+      (pretty-format (group (format-term js)) #f))
+  (if (render-pretty-javascript?)
+      (javascript->pretty-string js)
+      (fast-javascript->string js)))
+
 
 ; javascript -> string
 (define (javascript->pretty-string js)
-  (parameterize ([formatters/Expression (list* format-FunctionExpression
-                                               format-RawExpression
-                                               (formatters/Expression))]
-                 [formatters/Statement  (list* format-BeginStatement
-                                               (formatters/Statement))])
+  (parameterize ([allow-nested-function-declarations? #t]
+                 [formatters/Expression               (list* format-FunctionExpression
+                                                             format-RawExpression
+                                                             (formatters/Expression))]
+                 [formatters/Statement                (list* format-BeginStatement
+                                                             (formatters/Statement))])
     (pretty-format (format-term js))))
 
 ; Custom printers --------------------------------
