@@ -11,7 +11,7 @@
   (cond [(plain:quotable-value? val) (plain:quotable-value->string val)]
         [(javascript? val)           (if pretty?
                                          (javascript->pretty-string val)
-                                         (javascript->string val))]
+                                         (javascript->packed-string val))]
         [else              (error (format "Expected quotable value, received ~s." val))]))
 
 ; symbol -> boolean
@@ -36,7 +36,7 @@
 ; quotable-value -> quotable-value
 (define (quote-javascript-attribute-value val)
   (if (javascript? val)
-      (javascript->string val)
+      (javascript->packed-string val)
       val))
 
 ; string output-stream -> void
