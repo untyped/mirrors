@@ -7,7 +7,9 @@
          "lang-test.ss"
          #;"render-test.ss"
          "response-test.ss"
-         "syntax-test.ss")
+         "syntax-test.ss"
+         "javascript-registry-test.ss"
+         "sexp/module-test.ss")
 
 (define all-javascript-tests
   (test-suite "javascript"
@@ -16,7 +18,9 @@
     lang-tests
     syntax-tests
     #;render-tests
-    response-tests))
+    response-tests
+    javascript-registry-tests
+    module-tests))
 
 ; Provide statements -----------------------------
 
