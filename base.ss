@@ -5,7 +5,7 @@
 (require (planet untyped/unlib:3/require))
 
 (define-library-aliases cce-scheme (planet cce/scheme:4:1)          #:provide)
-(define-library-aliases javascript (planet dherman/javascript:8)    #:provide)
+(define-library-aliases javascript (planet dherman/javascript:9:2)  #:provide)
 (define-library-aliases pprint     (planet dherman/pprint:4)        #:provide)
 (define-library-aliases schemeunit (planet schematics/schemeunit:3) #:provide)
 (define-library-aliases spgsql     (planet schematics/spgsql:2)     #:provide)
