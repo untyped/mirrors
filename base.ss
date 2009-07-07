@@ -58,4 +58,4 @@
  [quote-case-restriction  (parameter/c (or/c 'lower 'upper))]
  [lowercase-quote-symbols (listof symbol?)]
  [uppercase-quote-symbols (listof symbol?)]
- [current-time-format     (parameter/c (or/c string? (-> (or/c time-utc? time-tai?) string?)))])
+ [current-time-format     (parameter/c (or/c string? (-> date? string?)))])

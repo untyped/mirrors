@@ -1,6 +1,7 @@
 #lang scheme/base
 
-(require "csv/csv.ss"
+(require "base.ss"
+         "csv/csv.ss"
          "javascript/javascript.ss"
          "plain/plain.ss"
          "xml/xml.ss")
@@ -10,4 +11,5 @@
 (provide (all-from-out "csv/csv.ss"
                        "javascript/javascript.ss"
                        "plain/plain.ss"
-                       "xml/xml.ss"))
+                       "xml/xml.ss")
+         current-time-format)

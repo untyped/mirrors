@@ -91,8 +91,7 @@ The forms above use the same parenthetical Javascript syntax:
                      (unquote-splicing expr)
                      js-expr]
    [js-decl          (custom-syntax-id js-decl ...)
-                     (function id (id ...) js-stmt ...)
-                     (var js-init ...)]
+                     (function id (id ...) js-stmt ...)]
    [js-init          id
                      [id js-expr]
                      (unquote expr)
@@ -125,11 +124,12 @@ The forms above use the same parenthetical Javascript syntax:
    [dot-expr         (code:line id    (code:comment "property-style: a.b"))
                      (code:line (!index id expr) (code:comment "array-style: a.b[1]"))
                      (code:line (id js-expr ...) (code:comment "method-style: a.b(1, 2)"))]
-   [opt-decl         _
-                     var-decl]
-   [opt-expr         _
-                     expr]]
-                     
+   [switch-clause    (case id js-expr ...)
+                     (default js-expr ...)]
+   [opt-decl         _ var-decl]
+   [opt-expr         _ expr]
+   [var-decl         (var js-init ...)]]
+
 @scheme[!raw] forms are treated as statements or expressions depending on their context. Semicolons and parentheses are added automatically depending on the interpretation of the block:
 
 @examples[
