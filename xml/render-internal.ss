@@ -10,7 +10,7 @@
 (define (quotable-value->string val [pretty? #t])
   (cond [(plain:quotable-value? val) (plain:quotable-value->string val)]
         [(javascript? val)           (if pretty?
-                                         (javascript->pretty-string val)
+                                         (javascript->string val)
                                          (javascript->packed-string val))]
         [else              (error (format "Expected quotable value, received ~s." val))]))
 
