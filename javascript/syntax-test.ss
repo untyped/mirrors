@@ -4,6 +4,7 @@
                      "../test-base.ss"
                      "syntax-internal.ss")
          (prefix-in scheme: scheme/pretty)
+         srfi/13
          "../test-base.ss"
          "expander.ss"
          "render.ss"
@@ -23,7 +24,7 @@
          (with-syntax ([expanded (expand-javascript #'actual)])
            #`(test-case message
                (with-check-info (['compiled expanded])
-                 (check-equal? (javascript->string expanded)
+                 (check-equal? (string-trim-both (javascript->string expanded))
                                expected)))))])))
 
 (define-javascript-syntax (!var-debug [id expr] ...)

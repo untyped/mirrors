@@ -34,13 +34,13 @@
                                                        (when expr
                                                          (display-str " = ")
                                                          (display-js expr))]
-      [(struct FunctionDeclaration (_ id args body))   (display-str "function ")
+      [(struct FunctionDeclaration (_ id args body))   (display-str "function")
                                                        (display-js id)
                                                        (display-str "(")
                                                        (display-list ", " args)
                                                        (display-str ") { ")
                                                        (for-each display-js body)
-                                                       (display-str "} ")]
+                                                       (display-str "}")]
       [(struct VariableDeclaration (_ bindings))       (display-str "var ")
                                                        (display-list ", " bindings)
                                                        (display-str "; ")]
@@ -72,7 +72,8 @@
       [(struct NewExpression (_ id args))              (display-str "new ")
                                                        (display-js id)
                                                        (display-str "(")
-                                                       (display-list ", " args)]
+                                                       (display-list ", " args)
+                                                       (display-str ")")]
       [(struct PostfixExpression (_ expr op))          (display-js expr)
                                                        (display-str op)]
       [(struct PrefixExpression (_ op expr))           (display-str op)
@@ -98,7 +99,7 @@
                                                        (display-str " ")
                                                        (display-js rhs)
                                                        (display-str ")")]
-      [(struct FunctionExpression (_ id args body))    (display-str "function ")
+      [(struct FunctionExpression (_ id args body))    (display-str "(function")
                                                        (when id
                                                          (display-js id)
                                                          (display-str " "))
@@ -106,7 +107,7 @@
                                                        (display-list ", " args)
                                                        (display-str ") { ")
                                                        (for-each display-js body)
-                                                       (display-str "} ")]
+                                                       (display-str "})")]
       [(struct CallExpression (_ fn args))             (display-js fn)
                                                        (display-str "(")
                                                        (display-list ", " args)
