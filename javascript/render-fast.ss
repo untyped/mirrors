@@ -75,7 +75,7 @@
                                                        (display-list ", " args)]
       [(struct PostfixExpression (_ expr op))          (display-js expr)
                                                        (display-str op)]
-      [(struct PrefixExpression (_ expr op))           (display-str op)
+      [(struct PrefixExpression (_ op expr))           (display-str op)
                                                        (display-js expr)]
       [(struct InfixExpression (_ left op right))      (display-str "(")
                                                        (display-js left)
