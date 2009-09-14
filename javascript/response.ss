@@ -15,7 +15,7 @@
 ;  javascript
 ; ->
 ;  response
-(define (make-js-response
+(define (make-javascript-response
          #:code      [code      200]
          #:message   [message   #"OK"]
          #:seconds   [seconds   (current-seconds)]
@@ -27,13 +27,24 @@
     (make-response/full code message seconds mime-type headers
                         (list (string+bytes->content (javascript->string content))))))
 
+; Contract as above.
+(define make-js-response
+  make-javascript-response)
+
 ; Provide statements -----------------------------
 
 (provide/contract
- [make-js-response  (->* (javascript?)
-                         (#:code integer? 
-                                 #:message   (or/c string? bytes?)
-                                 #:seconds   integer?
-                                 #:mime-type (or/c string? bytes?)
-                                 #:headers   (listof header?))
-                         response/full?)])
+ [make-javascript-response (->* (javascript?)
+                                (#:code integer? 
+                                        #:message   (or/c string? bytes?)
+                                        #:seconds   integer?
+                                        #:mime-type (or/c string? bytes?)
+                                        #:headers   (listof header?))
+                                response/full?)]
+ [make-js-response         (->* (javascript?)
+                                (#:code integer? 
+                                        #:message   (or/c string? bytes?)
+                                        #:seconds   integer?
+                                        #:mime-type (or/c string? bytes?)
+                                        #:headers   (listof header?))
+                                response/full?)])

@@ -10,7 +10,8 @@
     (ul (li "replaced the " (tt "render-pretty-javascript?") " parameter with " (tt "javascript-rendering-mode") ";")
         (li "added " (tt "javascript->packed-string") ";")
         (li "fixed bug that disallowed named function declarations within " (tt "!begin") " blocks;")
-        (li "better documentation of Javascript syntax."))))
+        (li "better documentation of Javascript syntax;")
+        (li "added " (tt "make-javascript-response") " as a synonym for " (tt "make-js-response") "."))))
 
 (define primary-file "mirrors.ss")
 
