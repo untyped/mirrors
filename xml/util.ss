@@ -6,6 +6,12 @@
          "struct.ss"
          (only-in "struct-internal.ss" quotable-value?))
 
+(define xml-1.0-header
+  (xml (!raw #<<ENDHEADER
+<?xml version="1.0" encoding="utf-8"?>
+ENDHEADER
+             )))
+
 ; xml
 (define xhtml-1.0-strict-doctype
   (xml (!raw #<<ENDDOCTYPE
@@ -39,6 +45,7 @@ ENDDOCTYPE
 ; Provide statements -----------------------------
 
 (provide/contract
+ [xml-1.0-header                 xml?]
  [xhtml-1.0-strict-doctype       xml?]
  [xhtml-1.0-transitional-doctype xml?]
  [xhtml-1.0-frameset-doctype     xml?]

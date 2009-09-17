@@ -47,6 +47,13 @@ Returns @scheme[#t] if @scheme[val] is an XML fragment that will produce no rend
 
 The following XML expressions are defined for convenience:
 
+@defthing[xml-1.0-header xml]{
+An XML 1.0 header that specifies the character encoding as UTF-8:
+
+@interaction[
+  #:eval xml-eval
+ (display (xml->string xml-1.0-header))]}
+
 @defthing[xhtml-1.0-strict-doctype xml]{
 The HTML 1.0 transitional DOCTYPE, complete with newline character:
 
