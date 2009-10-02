@@ -1,5 +1,5 @@
 #lang scheme/base
- 
+
 ; Require/provide aliases ------------------------
 
 (require (planet untyped/unlib:3/require))
@@ -16,7 +16,7 @@
          scheme/match
          srfi/19
          srfi/26
-         (unlib-in debug exn time))
+         (except-in (unlib-in debug exn time) time-utc->string time-tai->string))
 
 ; Configuration --------------------------------
 
