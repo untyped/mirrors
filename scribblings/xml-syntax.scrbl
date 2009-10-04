@@ -1,7 +1,6 @@
 #lang scribble/doc
 
-@(require (planet untyped/mirrors/base)
-          (file "base.ss"))
+@(require "base.ss")
 
 @(define-eval xml-eval (for-syntax scheme/base) (planet untyped/mirrors/xml/xml))
 
