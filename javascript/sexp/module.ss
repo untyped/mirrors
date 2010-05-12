@@ -30,7 +30,7 @@
      #'(#%plain-module-begin
         require ...
         (define script (js stmt ...))
-        (display (javascript->pretty-string script))
+        #;(display (javascript->pretty-string script))
         (registry-add! script)
         (provide script)))]))
 

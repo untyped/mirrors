@@ -40,5 +40,4 @@
            (registry->string))
           [(list (cons start end))
            (check > start 0)]
-          [_ (fail "Registry does not contain test1.ss script")]))
-  )
+          [_ (fail "Registry does not contain test1.ss script")])))

@@ -115,7 +115,7 @@
                                            #,(expand-identifier #'label)
                                            #,(expand-statement #'stmt))]
     [(!label arg ...)                   (raise-syntax-error #f "bad JS syntax" stx)]
-    [(throw expr)                       #`(make-ThrowStatment #f #,(expand-expression #'expr))]
+    [(throw expr)                       #`(make-ThrowStatement #f #,(expand-expression #'expr))]
     [(throw arg ...)                    (raise-syntax-error #f "bad JS syntax" stx)]
     [(try stmt+clause ...)              #`(make-TryStatement #f #,@(expand-try-clauses #'(stmt+clause ...)))]
     [(unquote stmt)                     #`(quote-statement stmt)]
