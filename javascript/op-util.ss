@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang scheme
 
-(require (for-syntax scheme/base
-                     "op-util-internal.ss"
+(require "../base.ss")
+
+(require (for-syntax "op-util-internal.ss"
                      "op.ss")
-         scheme/contract
          "struct.ss")
 
 ; Syntax -----------------------------------------

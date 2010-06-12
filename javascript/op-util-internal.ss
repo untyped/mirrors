@@ -1,15 +1,24 @@
-#lang scheme/base
+#lang scheme
 
-(require "../base.ss"
-         (for-template scheme/base
-                       "../base.ss"))
+(require "../base.ss")
 
 (require (only-in srfi/1 append-map iota make-list)
          srfi/26
          (unlib-in syntax)
          "op.ss"
-         (for-template (only-in srfi/1 drop-right take-right)
+         (for-template (except-in scheme/base
+                                  make-date
+                                  date?
+                                  date-year
+                                  date-month
+                                  date-day
+                                  date-week-day
+                                  date-hour
+                                  date-minute
+                                  date-second)
+                       scheme/list
                        (unlib-in syntax)
+                       "../base.ss"
                        "struct.ss"
                        "quote.ss"))
 

@@ -1,10 +1,8 @@
-#lang scheme/base
+#lang scheme
 
 (require "../base.ss")
 
-(require (for-syntax scheme/base
-                     scheme/pretty
-                     "../base.ss"
+(require (for-syntax "../base.ss"
                      "syntax-expand.ss"
                      "syntax-prerender.ss")
          "struct.ss"

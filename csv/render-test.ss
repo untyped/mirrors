@@ -2,14 +2,18 @@
 
 (require "../test-base.ss")
 
-(require srfi/19
-         "render.ss"
+(require "render.ss"
          "struct.ss")
 
 ; Helpers ----------------------------------------
 
-(define utc-date (date->time-utc (make-date 0 56 34 12 01 02 2003 0)))
-(define tai-date (date->time-tai (make-date 0 56 34 12 01 02 2003 0)))
+; GMT:
+(define utc-winter-date (date->time-utc (make-date 0 56 34 12 01 02 2003)))
+(define tai-winter-date (date->time-tai (make-date 0 56 34 12 01 02 2003)))
+
+; BST:
+(define utc-summer-date (date->time-utc (make-date 0 56 34 12 01 07 2003)))
+(define tai-summer-date (date->time-tai (make-date 0 56 34 12 01 07 2003)))
 
 ; Tests ------------------------------------------
 
@@ -28,10 +32,16 @@
       (check-equal? (csv->string (cell #"bytes"))                 "\"bytes\"")
       (check-equal? (csv->string (cell (string->url "/u/r/l")))   "\"/u/r/l\"")
       (check-equal? (csv->string (cell "\"string\" with quotes")) "\"\"\"string\"\" with quotes\"")
-      ; These checks give different results depending on your time zone and DST settings:
-      (let ([hour (+ 12 (floor (/ (current-time-zone-offset) (* 60 60))))])
-        (check-equal? (csv->string (cell utc-date)) (format "\"2003-02-01 ~a:34:56\"" hour))
-        (check-equal? (csv->string (cell tai-date)) (format "\"2003-02-01 ~a:34:56\"" hour))))
+      ; Times are rendered in the correct immediate time zone:
+      (check-equal? (csv->string (cell utc-winter-date)) "\"2003-02-01 12:34:56\"" "time-utc (GMT)")
+      (check-equal? (csv->string (cell tai-winter-date)) "\"2003-02-01 12:34:56\"" "time-utc (GMT)")
+      (check-equal? (csv->string (cell utc-summer-date)) "\"2003-07-01 12:34:56\"" "time-utc (BST)")
+      (check-equal? (csv->string (cell tai-summer-date)) "\"2003-07-01 12:34:56\"" "time-utc (BST)")
+      (parameterize ([current-tz "PST8PDT"])
+        (check-equal? (csv->string (cell utc-winter-date)) "\"2003-02-01 04:34:56\"" "time-utc (PST)")
+        (check-equal? (csv->string (cell tai-winter-date)) "\"2003-02-01 04:34:56\"" "time-utc (PST)")
+        (check-equal? (csv->string (cell utc-summer-date)) "\"2003-07-01 04:34:56\"" "time-utc (PDT)")
+        (check-equal? (csv->string (cell tai-summer-date)) "\"2003-07-01 04:34:56\"" "time-utc (PDT)")))
     
     (test-equal? "single row"
       (csv->string (row (cell 1) (cell "2") (cell 3)))

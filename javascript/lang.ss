@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang scheme
 
-(require (only-in srfi/1 drop-right take-right)
-         "../base.ss"
-         "op-util.ss"
+(require "../base.ss")
+
+(require "op-util.ss"
          "quote.ss"
          "struct.ss")
 

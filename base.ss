@@ -8,15 +8,13 @@
 (define-library-aliases javascript (planet dherman/javascript:9:2)  #:provide)
 (define-library-aliases pprint     (planet dherman/pprint:4)        #:provide)
 (define-library-aliases schemeunit (planet schematics/schemeunit:3) #:provide)
-(define-library-aliases spgsql     (planet schematics/spgsql:2)     #:provide)
-(define-library-aliases unlib      (planet untyped/unlib:3:13)      #:provide)
+(define-library-aliases unlib      (planet untyped/unlib:3)         #:provide)
 
 (require net/url
          scheme/contract
          scheme/match
-         srfi/19
          srfi/26
-         (except-in (unlib-in debug exn time) time-utc->string time-tai->string))
+         (unlib-in debug exn date))
 
 ; Configuration --------------------------------
 
@@ -52,7 +50,7 @@
                        scheme/contract
                        scheme/match
                        srfi/26)
-         (unlib-out debug exn time))
+         (unlib-out debug exn date))
 
 (provide/contract
  [quote-case-restriction  (parameter/c (or/c 'lower 'upper))]

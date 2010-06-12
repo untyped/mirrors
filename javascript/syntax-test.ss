@@ -1,9 +1,7 @@
-#lang scheme/base
+#lang scheme
 
-(require (for-syntax scheme/base
-                     "../test-base.ss"
+(require (for-syntax "../test-base.ss"
                      "syntax-internal.ss")
-         (prefix-in scheme: scheme/pretty)
          srfi/13
          "../test-base.ss"
          "expander.ss"
@@ -112,7 +110,7 @@
     
     (test-js "stmt: if version 1"
       (if x (return y))
-      "if (x) return y; ")
+      "if (x) return y;")
     
     (test-js "stmt: if version 2"
       (if x (return y) (return z))
@@ -138,6 +136,10 @@
       (lambda ()
         (js (for-in ((var key val) (!object [a 1] [b 2] [c 3]))
               (alert (+ key ": " val))))))
+    
+    (test-js "stmt: throw"
+      (throw "x")
+      "throw \"x\";")
     
     (test-js "stmt: try version 1"
       (try (+ 1 2) (+ 2 3) (catch e (+ 3 4)) (finally (+ 4 5)))

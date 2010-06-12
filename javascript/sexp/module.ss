@@ -1,8 +1,9 @@
 #lang scheme/base
 
+(require "../../base.ss")
+
 (require (for-syntax scheme/base
-                     (planet untyped/unlib:3/debug)
-                     (planet untyped/unlib:3/syntax))
+                     (unlib-in debug syntax))
          "../javascript.ss"
          "../javascript-registry.ss")
 
@@ -30,7 +31,7 @@
      #'(#%plain-module-begin
         require ...
         (define script (js stmt ...))
-        (display (javascript->pretty-string script))
+        #;(display (javascript->pretty-string script))
         (registry-add! script)
         (provide script)))]))
 
