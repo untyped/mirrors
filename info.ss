@@ -7,7 +7,7 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "time rendering is based off of unlib/date.ss: times are rendered in daylight saving time for the current locale (as set by current-tz from bzlib/date-tz.plt)."))))
+    (ul (li "nothing yet..."))))
 
 (define primary-file "mirrors.ss")
 
