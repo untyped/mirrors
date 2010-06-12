@@ -1,13 +1,10 @@
 #lang scheme/base
 
-(require (for-syntax scheme/base)
-         "../test-base.ss")
+(require "../test-base.ss")
 
-(require (for-syntax "syntax-prerender.ss"
+(require (for-syntax scheme/base
+                     "syntax-prerender.ss"
                      "syntax-expand.ss")
-         srfi/19
-         (unlib-in time)
-         "../test-base.ss"
          "../javascript/javascript.ss"
          "expander.ss"
          "render.ss"
@@ -20,8 +17,14 @@
 (define url2     (string->url "http://www.example.com?a=b&c=d"))
 (define text     "Text")
 (define sym      'symbol)
-(define utc-date (date->time-utc (make-date 0 56 34 12 01 02 2003 0)))
-(define tai-date (date->time-tai (make-date 0 56 34 12 01 02 2003 0)))
+
+; GMT:
+(define utc-winter-date (date->time-utc (make-date 0 56 34 12 01 02 2003)))
+(define tai-winter-date (date->time-tai (make-date 0 56 34 12 01 02 2003)))
+
+; BST:
+(define utc-summer-date (date->time-utc (make-date 0 56 34 12 01 07 2003)))
+(define tai-summer-date (date->time-tai (make-date 0 56 34 12 01 07 2003)))
 
 (define-xml-syntax (!wrap expr1 expr2)
   (xml expr1 expr2 expr1))
@@ -44,16 +47,22 @@
   (test-suite "render.ss"
     
     (test-case "literals"
-      (check-xml #t            "yes"                                "true")
-      (check-xml #f            ""                                   "false")
-      (check-xml 12345         "12345"                              "number")
-      (check-xml "blah &\"<>"  "blah &amp;&quot;&lt;&gt;"           "string")
-      (check-xml 'blah\&\"<>   "blah&amp;&quot;&lt;&gt;"            "symbol")
-      (check-xml #"blah &\"<>" "blah &amp;&quot;&lt;&gt;"           "bytes")
-      ; These checks give different results depending on your time zone and DST settings:
-      (let ([hour (+ 12 (floor (/ (current-time-zone-offset) (* 60 60))))])
-        (check-xml ,utc-date (format "2003-02-01 ~a:34:56" hour)    "time-utc")
-        (check-xml ,tai-date (format "2003-02-01 ~a:34:56" hour)    "time-tai")))
+      (check-xml #t               "yes"                      "true")
+      (check-xml #f               ""                         "false")
+      (check-xml 12345            "12345"                    "number")
+      (check-xml "blah &\"<>"     "blah &amp;&quot;&lt;&gt;" "string")
+      (check-xml 'blah\&\"<>      "blah&amp;&quot;&lt;&gt;"  "symbol")
+      (check-xml #"blah &\"<>"    "blah &amp;&quot;&lt;&gt;" "bytes")
+      ; Times are rendered in the correct immediate time zone:
+      (check-xml ,utc-winter-date "2003-02-01 12:34:56" "time-utc (GMT)")
+      (check-xml ,tai-winter-date "2003-02-01 12:34:56" "time-tai (GMT)")
+      (check-xml ,utc-summer-date "2003-07-01 12:34:56" "time-utc (BST)")
+      (check-xml ,tai-summer-date "2003-07-01 12:34:56" "time-tai (BST)")
+      (parameterize ([current-tz "PST8PDT"])
+        (check-xml ,utc-winter-date "2003-02-01 04:34:56" "time-utc (PST)")
+        (check-xml ,tai-winter-date "2003-02-01 04:34:56" "time-tai (PST)")
+        (check-xml ,utc-summer-date "2003-07-01 04:34:56" "time-utc (PDT)")
+        (check-xml ,tai-summer-date "2003-07-01 04:34:56" "time-tai (PDT)")))
     
     (test-case "raw"
       (check-xml (!raw "&\"<>") "&\"<>"                          "string")

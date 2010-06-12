@@ -1,9 +1,7 @@
-#lang scheme/base
+#lang scheme
 
-(require (for-syntax scheme/base
-                     "../test-base.ss"
+(require (for-syntax "../test-base.ss"
                      "syntax-internal.ss")
-         (prefix-in scheme: scheme/pretty)
          srfi/13
          "../test-base.ss"
          "expander.ss"

@@ -1,8 +1,9 @@
 #lang scheme/base
 
+(require "../../base.ss")
+
 (require (for-syntax scheme/base
-                     (planet untyped/unlib:3/debug)
-                     (planet untyped/unlib:3/syntax))
+                     (unlib-in debug syntax))
          "../javascript.ss"
          "../javascript-registry.ss")
 

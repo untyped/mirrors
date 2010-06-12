@@ -1,9 +1,8 @@
-#lang scheme/base
+#lang scheme
 
 (require "../base.ss")
 
-(require (for-syntax scheme/base
-                     "../base.ss"
+(require (for-syntax "../base.ss"
                      "syntax-internal.ss"))
 
 ; Lowercase --------------------------------------

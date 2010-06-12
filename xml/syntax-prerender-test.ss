@@ -2,8 +2,7 @@
 
 (require "../test-base.ss")
 
-(require srfi/19
-         "struct.ss"
+(require "struct.ss"
          "syntax.ss")
 
 ; Helpers ----------------------------------------
@@ -11,8 +10,8 @@
 (define test-url "http://www.example.com")
 (define text     "Text")
 (define sym      'symbol)
-(define utc-date (date->time-utc (make-date 0 56 34 12 01 02 2003 0)))
-(define tai-date (date->time-tai (make-date 0 56 34 12 01 02 2003 0)))
+(define utc-date (date->time-utc (make-date 0 56 34 12 01 02 2003)))
+(define tai-date (date->time-tai (make-date 0 56 34 12 01 02 2003)))
 
 ; Tests ------------------------------------------
 

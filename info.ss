@@ -7,7 +7,7 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "nothing as yet..."))))
+    (ul (li "time rendering is based off of unlib/date.ss: times are rendered in daylight saving time for the current locale (as set by current-tz from bzlib/date-tz.plt)."))))
 
 (define primary-file "mirrors.ss")
 
@@ -21,6 +21,10 @@
 
 (define repositories '("4.x"))
 
-(define compile-omit-files '("sql"))
+(define compile-omit-files
+  '("autoplanet.ss"
+    "build.ss"
+    "planet"
+    "planetdev"))
 
 
