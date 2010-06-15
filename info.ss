@@ -3,7 +3,7 @@
 (define name "mirrors")
 
 (define blurb 
-  '("Languages for the programatic assembly of XML, Javascript and CSV data."))
+  '("Programatic assembly of XML, Javascript and CSV data."))
 
 (define release-notes
   '((p "Changes and additions:")
