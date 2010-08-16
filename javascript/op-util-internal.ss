@@ -13,6 +13,7 @@
                                   date-month
                                   date-day
                                   date-week-day
+                                  date-year-day
                                   date-hour
                                   date-minute
                                   date-second)
