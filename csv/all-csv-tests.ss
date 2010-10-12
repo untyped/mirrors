@@ -6,13 +6,7 @@
          "response-test.ss"
          "struct-test.ss")
 
-; test-suite
-(define all-csv-tests
-  (test-suite "csv"
-    struct-tests
-    render-tests
-    response-tests))
-
-; Provide statements -----------------------------
-
-(provide all-csv-tests)
+(define/provide-test-suite all-csv-tests
+  struct-tests
+  render-tests
+  response-tests)

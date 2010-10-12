@@ -9,13 +9,8 @@
 
 ; Tests ------------------------------------------
 
-(define all-mirrors-tests
-  (test-suite "mirrors"
-    all-plain-tests
-    all-csv-tests
-    all-javascript-tests
-    all-xml-tests))
-
-; Provide statements -----------------------------
-
-(provide all-mirrors-tests)
+(define/provide-test-suite all-mirrors-tests
+  all-plain-tests
+  all-csv-tests
+  all-javascript-tests
+  all-xml-tests)

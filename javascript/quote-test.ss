@@ -4,8 +4,7 @@
          "quote.ss"
          "struct.ss")
 
-(define quote-tests
-  (test-suite "quote.ss"
+(define/provide-test-suite quote-tests
     
     (test-case "quote-id"
       (check-equal? (quote-identifier (make-Identifier #f 'a)) (make-Identifier #f 'a) "id")
@@ -52,10 +51,4 @@
     (test-case "wrap-block: multiple statements"
       (check-equal? (wrap-block (list 'x 'y)) 
                     (make-BlockStatement #f (list (make-ExpressionStatement #f (make-StringLiteral #f "x"))
-                                                  (make-ExpressionStatement #f (make-StringLiteral #f "y"))))))
-    
-    ))
-
-; Provide statements -----------------------------
-
-(provide quote-tests)
+                                                  (make-ExpressionStatement #f (make-StringLiteral #f "y")))))))

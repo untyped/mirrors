@@ -9,15 +9,10 @@
          "syntax-prerender-test.ss"
          "util-test.ss")
 
-(define all-xml-tests
-  (test-suite "xml"
-    render-tests
-    struct-tests
-    syntax-expand-tests
-    syntax-prerender-tests
-    response-tests
-    util-tests))
-
-; Provide statements -----------------------------
-
-(provide all-xml-tests)
+(define/provide-test-suite all-xml-tests
+  render-tests
+  struct-tests
+  syntax-expand-tests
+  syntax-prerender-tests
+  response-tests
+  util-tests)

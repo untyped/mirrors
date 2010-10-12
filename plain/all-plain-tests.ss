@@ -4,10 +4,5 @@
 
 (require "response-test.ss")
 
-(define all-plain-tests
-  (test-suite "plain"
-    response-tests))
-
-; Provide statements -----------------------------
-
-(provide all-plain-tests)
+(define/provide-test-suite all-plain-tests
+  response-tests)

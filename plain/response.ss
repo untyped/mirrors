@@ -2,7 +2,8 @@
 
 (require "../base.ss")
 
-(require web-server/servlet
+(require web-server/http
+         web-server/servlet
          (unlib-in bytes number)
          "util.ss")
 
@@ -74,6 +75,17 @@
                             headers))
    (list #"Redirecting you - please wait...")))
 
+; string string [boolean] -> (listof header)
+(define (file-download-headers filename mime-type #:no-cache? [no-cache? #t])
+  (let* ([content-disposition-string (format "attachment; filename=~a" filename)]
+         [content-disposition-header (make-header #"Content-Disposition" (string->bytes/utf-8 content-disposition-string))]
+         [content-type-header        (make-header #"Content-Type" (string->bytes/utf-8 mime-type))])
+    (list* content-disposition-header
+           content-type-header
+           (if no-cache?
+               no-cache-http-headers
+               null))))
+
 ; Helpers ----------------------------------------
 
 ; (U url string) -> bytes
@@ -107,4 +119,8 @@
        (#:code natural? 
                #:message (or/c string? bytes?)
                #:headers (listof header?))
-       response/full?)])
+       response/full?)]
+ [file-download-headers
+  (->* (string? string?)
+       (#:no-cache? boolean?)
+       (listof header?))])

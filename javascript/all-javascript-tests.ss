@@ -11,17 +11,12 @@
          "javascript-registry-test.ss"
          "sexp/module-test.ss")
 
-(define all-javascript-tests
-  (test-suite "javascript"
-    op-tests
-    quote-tests
-    lang-tests
-    syntax-tests
-    #;render-tests
-    response-tests
-    javascript-registry-tests
-    module-tests))
-
-; Provide statements -----------------------------
-
-(provide all-javascript-tests)
+(define/provide-test-suite all-javascript-tests
+  op-tests
+  quote-tests
+  lang-tests
+  syntax-tests
+  #;render-tests
+  response-tests
+  javascript-registry-tests
+  module-tests)
