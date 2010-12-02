@@ -160,8 +160,25 @@
                     (js (while (< x 15) (pre++ x)))))
     "while (x < 10) x++; while (x > 5) x--; while (x < 15) ++x;")
   
-  (test-js "expr: array"    (!array x "y" 123)            "[ x, \"y\", 123 ];")
-  (test-js "expr: object"   (!object [x 1] ["y" 2] [3 4]) "{ x: 1, \"y\": 2, 3: 4 };")
+  (test-js "expr: array"
+    (!array 'x "y" z 123 (+ 4 5))
+    "[ \"x\", \"y\", z, 123, 4 + 5 ];")
+  
+  (test-js "expr: array with unquote-splicing"
+    (!array ,@(list 'x "y" (js z) 123 (js (+ 4 5))))
+    "[ \"x\", \"y\", z, 123, 4 + 5 ];")
+  
+  (test-js "expr: object"
+    (!object [x 1] ["y" 2] [3 4] [5 (+ 6 7)])
+    "{ x: 1, \"y\": 2, 3: 4, 5: 6 + 7 };")
+  
+  (test-js "expr: object with unquote-splicing"
+    (!object ,@(list (cons 'x  1)
+                     (cons "y" 2)
+                     (cons 3   4)
+                     (cons 5   (js (+ 6 7)))))
+    "{ x: 1, \"y\": 2, 3: 4, 5: 6 + 7 };")
+  
   (test-js "expr: dot"      (!dot x y z)                  "x.y.z;")
   (test-js "expr: new"      (new Array 1 2 3)             "new Array(1, 2, 3);")
   (test-js "expr: index"    (!index (getStuff 1) (+ 2 3)) "getStuff(1)[2 + 3];")

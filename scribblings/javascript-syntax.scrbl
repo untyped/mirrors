@@ -98,7 +98,9 @@ The forms above use the same parenthetical Javascript syntax:
                      [id (unquote expr)]]
    [js-expr          (custom-syntax-id js-expr ...)
                      (js-operator js-expr ...)
+                     (!array ,@expr)
                      (!array js-expr ...)
+                     (!object ,@expr)
                      (!object [property js-expr] ...)
                      (!index js-expr js-expr)
                      (!dot js-expr dot-expr ...)
@@ -142,6 +144,22 @@ The forms above use the same parenthetical Javascript syntax:
   (code:comment "raw expressions are surrounded by parentheses:")
   (display (javascript->pretty-string
             (js (alert (+ 1 (!raw "2") 3)))))]
+
+The @scheme[unquote-splicing] variant of the @scheme[(!array ...)] form accepts a list of expressions thay may be quoted to Javascript. These include: symbols, strings, numbers, booleans, and the results of @scheme[(js ...)] forms.
+
+@examples[
+  #:eval js-eval
+  (display
+   (javascript->string
+    (js (!array ,@(list 'x "y" (js z) 123 (js (+ 4 5)))))))]
+
+The @scheme[unquote-splicing] variant of the @scheme[(!object ...)] form accepts an association list of key and value expressions. Keys may be symbols, strings, or numbers. Values may be any of the types listed for @scheme[(!array ...)] above.
+
+@examples[
+  #:eval js-eval
+  (display
+   (javascript->string
+    (js (!object ,@(list (cons 'x 1) (cons "y" (js z)) (cons 2 (js (+ 3 4))))))))]
 
 @section{Custom Javascript syntax}
 

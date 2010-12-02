@@ -7,7 +7,7 @@
 
 (define release-notes
   '((p "Changes and additions:")
-    (ul (li "nothing yet..."))))
+    (ul (li "added " (tt "unquote-splicing") " variants of " (tt "!array") " and " (tt "!object") "."))))
 
 (define primary-file "mirrors.ss")
 

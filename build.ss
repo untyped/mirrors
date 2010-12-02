@@ -49,8 +49,13 @@ ENDSCRIPT
   (test-compile)
   (system "mzscheme run-tests.ss"))
 
+(define (doc-compile)
+  (test-compile)
+  (system "scribble --htmls scribblings/mirrors.scrbl"))
+
 (match (vector-ref (current-command-line-arguments) 0)
   ["envvars"         (envvars)]
   ["compile"         (compile)]
   ["test-compile"    (test-compile)]
-  ["test"            (test)])
+  ["test"            (test)]
+  ["doc-compile"     (doc-compile)])
