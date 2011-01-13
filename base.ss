@@ -4,7 +4,7 @@
 
 (require (planet untyped/unlib:3/require))
 
-(define-library-aliases cce-scheme (planet cce/scheme:6)            #:provide)
+(define-library-aliases cce-scheme (planet cce/scheme:7)            #:provide)
 (define-library-aliases javascript (planet dherman/javascript:9:2)  #:provide)
 (define-library-aliases pprint     (planet dherman/pprint:4)        #:provide)
 (define-library-aliases schemeunit (planet schematics/schemeunit:3) #:provide)

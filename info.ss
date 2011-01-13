@@ -17,7 +17,7 @@
 
 (define categories '(devtools net ui xml))
 
-(define required-core-version "4.1.0.4")
+(define required-core-version "4.2.1")
 
 (define repositories '("4.x"))
 
